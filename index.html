@@ -70,12 +70,20 @@
         }
         
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.8rem;
             font-weight: 700;
             color: var(--primary-dark);
             text-decoration: none;
             letter-spacing: 0.5px;
+        }
+        
+        .logo-image {
+            height: 50px;
+            width: auto;
         }
         
         .nav-menu {
@@ -523,7 +531,10 @@
     <!-- Header Navigation -->
     <header class="header">
         <div class="nav-container">
-            <a href="#" class="logo">C. M. Conlan Contractors & Builders</a>
+            <a href="#" class="logo">
+                <img src="conlan-logo.png" alt="C. M. Conlan Logo" class="logo-image">
+                <span>C. M. Conlan Contractors & Builders</span>
+            </a>
             <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
             <nav>
                 <ul class="nav-menu" id="navMenu">
