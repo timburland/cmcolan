@@ -264,41 +264,6 @@
         }
         
         /* Statistics Section */
-        .stats-section {
-            padding: 6rem 4rem;
-            background: var(--primary-dark);
-            color: white;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        
-        .stat-item {
-            animation: fadeIn 1s ease-out;
-        }
-        
-        .stat-number {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 5rem;
-            font-weight: 700;
-            color: var(--accent-gold);
-            margin-bottom: 1rem;
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 300;
-        }
-        
         /* Testimonials Section */
         .testimonials-section {
             padding: 8rem 4rem;
@@ -558,7 +523,7 @@
     <!-- Header Navigation -->
     <header class="header">
         <div class="nav-container">
-            <a href="#" class="logo">C. M. Conlan</a>
+            <a href="#" class="logo">C. M. Conlan Contractors & Builders</a>
             <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
             <nav>
                 <ul class="nav-menu" id="navMenu">
@@ -607,29 +572,6 @@
     </section>
 
     <!-- Statistics Section -->
-    <section class="stats-section" id="stats">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-number">35+</span>
-                    <span class="stat-label">Years in Business</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">150+</span>
-                    <span class="stat-label">Happy Clients</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">200+</span>
-                    <span class="stat-label">Completed Projects</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">12</span>
-                    <span class="stat-label">Awards Won</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Testimonials Section -->
     <section class="testimonials-section" id="testimonials">
         <div class="container">
@@ -715,14 +657,15 @@
             <div class="footer-content">
                 <div>
                     <h3>C. M. Conlan Contractors & Builders</h3>
-                    <p>Building excellence in Montgomery County since 1989</p>
+                    <p>Building exceptional homes and lasting relationships in Montgomery County since 1989</p>
                     <p style="margin-top: 2rem;">© 2026 C. M. Conlan Contractors & Builders<br>All Rights Reserved</p>
                 </div>
                 <div>
                     <h3>Contact Us</h3>
                     <p>Montgomery County, Maryland</p>
-                    <p>Phone: (301) 555-XXXX</p>
-                    <p>Email: <a href="mailto:info@cmconlanbuilders.com">info@cmconlanbuilders.com</a></p>
+                    <p>Office: 301-983-1301</p>
+                    <p>Fax: 301-983-2544</p>
+                    <p>Email: <a href="/cdn-cgi/l/email-protection#ed8e859f849ead8e808e8283818c83c38e8280"><span class="__cf_email__" data-cfemail="c6a5aeb4afb586a5aba5a9a8aaa7a8e8a5a9ab">[email&#160;protected]</span></a></p>
                 </div>
                 <div>
                     <h3>Connect With Us</h3>
@@ -737,12 +680,12 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>Serving Bethesda, Chevy Chase, Potomac, Rockville, and surrounding areas</p>
+                <p>Proudly serving all of Montgomery County, Maryland</p>
             </div>
         </div>
     </footer>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -781,18 +724,4 @@
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.stat-item, .testimonial-card, .gallery-item').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'all 0.6s ease';
-            observer.observe(el);
-        });
-    </script>
-</body>
-</html>
+    
