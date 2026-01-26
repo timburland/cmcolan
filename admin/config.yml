@@ -1,0 +1,48 @@
+backend:
+  name: github
+  repo: timburland/cmcolan
+  branch: main
+  base_url: https://decapcms-oauth.netlify.app
+  auth_endpoint: auth
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+editor:
+  preview: false
+
+collections:
+  - name: "homes"
+    label: "Homes"
+    label_singular: "Home"
+    description: "Add/edit home listings (renderings, specs, descriptions, photos)."
+    file: "content/homes.json"
+    format: "json"
+    fields:
+      - label: "Listings"
+        name: "items"
+        widget: "list"
+        summary: "{{fields.headline}} ({{fields.city}}, {{fields.state}})"
+        fields:
+          - { label: "Headline", name: "headline", widget: "string" }
+          - { label: "Year", name: "year", widget: "number", value_type: "int", min: 1900, max: 2100 }
+          - label: "Status"
+            name: "status"
+            widget: "select"
+            options: ["Available", "Pre-Sold", "Sold"]
+            default: "Available"
+          - { label: "Street Address", name: "street", widget: "string" }
+          - { label: "City", name: "city", widget: "string", default: "Bethesda" }
+          - { label: "State", name: "state", widget: "string", default: "MD" }
+          - { label: "Short Blurb", name: "blurb", widget: "text", required: false }
+          - { label: "Description", name: "description", widget: "text" }
+          - label: "Primary Image"
+            name: "primaryImage"
+            widget: "image"
+          - label: "Gallery Images"
+            name: "galleryImages"
+            widget: "list"
+            required: false
+            field: { label: "Image", name: "image", widget: "image" }
+          - { label: "CTA Label", name: "ctaLabel", widget: "string", required: false, default: "Learn More" }
+          - { label: "CTA URL", name: "ctaUrl", widget: "string", required: false, hint: "Optional link to a details page or external listing." }

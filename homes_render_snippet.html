@@ -1,0 +1,65 @@
+<!-- 1) Add this where you want the listings -->
+<section id="homes" class="homes-section">
+  <div class="container">
+    <h2 class="section-title">Homes</h2>
+    <div id="homesGrid" class="homes-grid"></div>
+  </div>
+</section>
+
+<!-- 2) Add/merge this CSS -->
+<style>
+  .homes-section { padding: 6rem 4rem; background: #fff; }
+  .homes-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; }
+  .home-card { border: 1px solid #e6e6e6; background: #fff; overflow: hidden; }
+  .home-media { position: relative; }
+  .home-media img { width: 100%; height: 380px; object-fit: cover; display: block; }
+  .home-badge { position: absolute; top: 14px; left: 14px; background: rgba(0,0,0,0.82); color: #fff;
+                padding: 0.5rem 0.75rem; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .home-body { padding: 1.5rem 1.5rem 1.75rem; }
+  .home-title { font-size: 1.5rem; line-height: 1.25; margin: 0 0 0.75rem; }
+  .home-address { margin: 0 0 1rem; color: #555; }
+  .home-desc { margin: 0 0 1.25rem; color: #555; line-height: 1.7; }
+  .home-cta { display: inline-block; padding: 0.9rem 1.2rem; background: #111; color: #fff; text-decoration: none;
+              text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.9rem; }
+  @media (max-width: 900px) { .homes-grid { grid-template-columns: 1fr; } .home-media img { height: 320px; } }
+</style>
+
+<!-- 3) Add this JS near the bottom of the page -->
+<script>
+  async function loadHomes() {
+    const grid = document.getElementById("homesGrid");
+    if (!grid) return;
+
+    try {
+      const res = await fetch("/content/homes.json", { cache: "no-store" });
+      const data = await res.json();
+      const items = Array.isArray(data.items) ? data.items : [];
+
+      grid.innerHTML = items.map((h) => {
+        const badge = (h.status || "").toUpperCase();
+        const address = `${h.street || ""}, ${h.city || ""}, ${h.state || ""}`.replace(/^[,\s]+|[,\s]+$/g, "");
+        const ctaLabel = h.ctaLabel || "Learn More";
+        const ctaUrl = h.ctaUrl || "#contact";
+
+        return `
+          <article class="home-card">
+            <div class="home-media">
+              <img src="${h.primaryImage}" alt="${h.headline}" loading="lazy" />
+              ${badge ? `<div class="home-badge">${badge}</div>` : ""}
+            </div>
+            <div class="home-body">
+              <h3 class="home-title">${h.headline}</h3>
+              <p class="home-address">${address}</p>
+              <p class="home-desc">${h.description}</p>
+              <a class="home-cta" href="${ctaUrl}">${ctaLabel}</a>
+            </div>
+          </article>
+        `;
+      }).join("");
+    } catch (e) {
+      console.error("Failed to load homes:", e);
+      grid.innerHTML = "<p>Unable to load listings right now.</p>";
+    }
+  }
+  loadHomes();
+</script>
