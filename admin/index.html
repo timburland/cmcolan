@@ -370,6 +370,107 @@
       gap: 0.5rem;
     }
 
+    /* Publishing Progress */
+    .publishing-progress {
+      display: none;
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: var(--bg-cream);
+      border-radius: 8px;
+      border: 2px solid var(--accent-gold);
+    }
+
+    .publishing-progress.active {
+      display: block;
+    }
+
+    .publishing-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .publishing-step {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem;
+      background: white;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .publishing-step.active {
+      background: #fff3e0;
+      border-left: 4px solid var(--accent-gold);
+    }
+
+    .publishing-step.complete {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+    }
+
+    .step-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: #e5e5e5;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .publishing-step.active .step-icon {
+      background: var(--accent-gold);
+      color: white;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .publishing-step.complete .step-icon {
+      background: #28a745;
+      color: white;
+    }
+
+    .step-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+    }
+
+    .publishing-step.active .step-text {
+      font-weight: 600;
+    }
+
+    .final-success {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #d4edda;
+      border-radius: 4px;
+      border-left: 4px solid #28a745;
+      color: #155724;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .final-success.active {
+      display: flex;
+    }
+
+    .success-icon {
+      font-size: 1.5rem;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
     @media (max-width: 768px) {
       .home-item { grid-template-columns: 1fr; }
       .home-actions { flex-direction: row; }
@@ -537,6 +638,28 @@
         </div>
 
         <div id="formMessage" style="margin-bottom: 1rem;"></div>
+
+        <!-- Publishing Progress Indicator -->
+        <div id="publishingProgress" class="publishing-progress">
+          <div class="publishing-steps">
+            <div class="publishing-step" id="step1">
+              <div class="step-icon">1</div>
+              <div class="step-text">Preparing property data...</div>
+            </div>
+            <div class="publishing-step" id="step2">
+              <div class="step-icon">2</div>
+              <div class="step-text">Uploading to server...</div>
+            </div>
+            <div class="publishing-step" id="step3">
+              <div class="step-icon">3</div>
+              <div class="step-text">Publishing to website...</div>
+            </div>
+          </div>
+          <div class="final-success" id="finalSuccess">
+            <span class="success-icon">🎉</span>
+            <span>Your listing is now LIVE on the website!</span>
+          </div>
+        </div>
         
         <button type="submit" id="submitBtn">Save & Publish</button>
       </form>
@@ -931,7 +1054,21 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Publishing...';
 
+      // Show publishing progress
+      const progressContainer = document.getElementById('publishingProgress');
+      progressContainer.classList.add('active');
+      
+      // Reset all steps
+      document.getElementById('step1').classList.remove('active', 'complete');
+      document.getElementById('step2').classList.remove('active', 'complete');
+      document.getElementById('step3').classList.remove('active', 'complete');
+      document.getElementById('finalSuccess').classList.remove('active');
+
       try {
+        // Step 1: Prepare data
+        document.getElementById('step1').classList.add('active');
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         const street = document.getElementById('street').value;
         const city = document.getElementById('city').value;
         const state = document.getElementById('state').value;
@@ -978,6 +1115,13 @@
           ctaUrl: `home-details.html?id=${document.getElementById('homeId').value || generateId()}`
         };
 
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step1').classList.add('complete');
+
+        // Step 2: Save to local storage
+        document.getElementById('step2').classList.add('active');
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         if (editingId) {
           const index = homes.findIndex(h => h.id === editingId);
           homes[index] = formData;
@@ -985,18 +1129,32 @@
           homes.push(formData);
         }
 
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step2').classList.add('complete');
+
+        // Step 3: Publish to website
+        document.getElementById('step3').classList.add('active');
+        
         const result = await saveHomes();
         renderHomes();
         
-        showFormMessage(`✅ Success! Your home listing is now live on the website! (${result.count} total listings)`, 'success');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        document.getElementById('step3').classList.remove('active');
+        document.getElementById('step3').classList.add('complete');
+        
+        // Show final success
+        document.getElementById('finalSuccess').classList.add('active');
         
         setTimeout(() => {
           closeModal();
           submitBtn.disabled = false;
           submitBtn.textContent = 'Save & Publish';
-        }, 2000);
+          progressContainer.classList.remove('active');
+        }, 2500);
 
       } catch (error) {
+        progressContainer.classList.remove('active');
         showFormMessage('❌ Error: ' + error.message, 'error');
         submitBtn.disabled = false;
         submitBtn.textContent = 'Save & Publish';
