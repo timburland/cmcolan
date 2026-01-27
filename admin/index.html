@@ -305,11 +305,13 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.85);
       color: white;
-      padding: 0.25rem 0.5rem;
-      font-size: 0.75rem;
+      padding: 0.5rem;
+      font-size: 0.8rem;
       text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
     }
 
     .remove-image {
@@ -672,7 +674,8 @@
     const AUTH_KEY = 'cmconlan_auth';
 
     let primaryImageUrl = '';
-    let galleryImageUrls = [];
+    let primaryImageFilename = '';
+    let galleryImagesData = []; // Array of {url, filename}
     let editingId = null;
     let homes = [];
 
@@ -725,21 +728,29 @@
       document.getElementById('primaryComplete').style.display = 'none';
       document.getElementById('primaryUpload').classList.add('uploading');
       
-      // Simulate progress
       const progressBar = document.getElementById('primaryProgress');
+      progressBar.style.width = '0%';
+      progressBar.textContent = '0%';
+      
+      // Smooth progress animation
       let progress = 0;
       const progressInterval = setInterval(() => {
-        progress += 10;
-        if (progress <= 90) {
+        if (progress < 70) {
+          progress += 10;
           progressBar.style.width = progress + '%';
           progressBar.textContent = progress + '%';
         }
-      }, 100);
+      }, 200);
 
       try {
         const reader = new FileReader();
         reader.onload = async (e) => {
           const imageData = e.target.result;
+          
+          // Set to 75% when starting upload
+          clearInterval(progressInterval);
+          progressBar.style.width = '75%';
+          progressBar.textContent = '75%';
           
           // Upload to Azure Blob Storage
           const response = await fetch('/api/upload-image', {
@@ -753,13 +764,14 @@
 
           const result = await response.json();
           
-          clearInterval(progressInterval);
+          // Complete to 100%
           progressBar.style.width = '100%';
           progressBar.textContent = '100%';
           
           if (result.success) {
             primaryImageUrl = result.url;
-            displayPrimaryPreview(result.url);
+            primaryImageFilename = file.name;
+            displayPrimaryPreview(result.url, file.name);
             
             setTimeout(() => {
               document.getElementById('primaryUploading').classList.remove('active');
@@ -791,10 +803,29 @@
 
       const progressBar = document.getElementById('galleryProgress');
       let uploadedCount = 0;
+      let skippedCount = 0;
       const totalFiles = files.length;
 
       for (const file of files) {
         if (!file.type.startsWith('image/')) continue;
+
+        // Check for duplicate filename
+        const existingImage = galleryImagesData.find(img => img.filename === file.name);
+        if (existingImage) {
+          const confirmReplace = confirm(`"${file.name}" already uploaded. Replace it?`);
+          if (!confirmReplace) {
+            skippedCount++;
+            uploadedCount++;
+            const progress = Math.round((uploadedCount / totalFiles) * 100);
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = `${uploadedCount}/${totalFiles} photos`;
+            continue;
+          } else {
+            // Remove the old one
+            const index = galleryImagesData.findIndex(img => img.filename === file.name);
+            galleryImagesData.splice(index, 1);
+          }
+        }
 
         try {
           const reader = new FileReader();
@@ -816,7 +847,10 @@
           const result = await response.json();
           
           if (result.success) {
-            galleryImageUrls.push(result.url);
+            galleryImagesData.push({
+              url: result.url,
+              filename: file.name
+            });
           }
           
           uploadedCount++;
@@ -834,19 +868,26 @@
       
       setTimeout(() => {
         document.getElementById('galleryUploading').classList.remove('active');
-        document.getElementById('galleryComplete').style.display = 'flex';
+        if (galleryImagesData.length > 0) {
+          let message = `✓ ${galleryImagesData.length} photo${galleryImagesData.length > 1 ? 's' : ''} uploaded!`;
+          if (skippedCount > 0) {
+            message += ` (${skippedCount} skipped)`;
+          }
+          document.getElementById('galleryComplete').innerHTML = message;
+          document.getElementById('galleryComplete').style.display = 'flex';
+        }
       }, 500);
       
       document.getElementById('galleryUpload').classList.remove('uploading');
     }
 
-    function displayPrimaryPreview(url) {
+    function displayPrimaryPreview(url, filename) {
       const preview = document.getElementById('primaryPreview');
       if (url) {
         preview.innerHTML = `
           <div class="preview-item">
             <img src="${url}" alt="Primary image">
-            <div class="preview-label">Main Photo</div>
+            <div class="preview-label">${filename || 'Main Photo'}</div>
             <button type="button" class="remove-image" onclick="removePrimaryImage()">×</button>
           </div>
         `;
@@ -857,10 +898,10 @@
 
     function displayGalleryPreview() {
       const preview = document.getElementById('galleryPreview');
-      preview.innerHTML = galleryImageUrls.map((url, index) => `
+      preview.innerHTML = galleryImagesData.map((img, index) => `
         <div class="preview-item">
-          <img src="${url}" alt="Gallery image ${index + 1}">
-          <div class="preview-label">Photo ${index + 1}</div>
+          <img src="${img.url}" alt="Gallery image ${index + 1}">
+          <div class="preview-label">${img.filename}</div>
           <button type="button" class="remove-image" onclick="removeGalleryImage(${index})">×</button>
         </div>
       `).join('');
@@ -868,16 +909,19 @@
 
     function removePrimaryImage() {
       primaryImageUrl = '';
-      displayPrimaryPreview('');
+      primaryImageFilename = '';
+      displayPrimaryPreview('', '');
       document.getElementById('primaryImageInput').value = '';
       document.getElementById('primaryComplete').style.display = 'none';
     }
 
     function removeGalleryImage(index) {
-      galleryImageUrls.splice(index, 1);
+      galleryImagesData.splice(index, 1);
       displayGalleryPreview();
-      if (galleryImageUrls.length === 0) {
+      if (galleryImagesData.length === 0) {
         document.getElementById('galleryComplete').style.display = 'none';
+      } else {
+        document.getElementById('galleryComplete').innerHTML = `✓ ${galleryImagesData.length} photo${galleryImagesData.length > 1 ? 's' : ''} uploaded!`;
       }
     }
 
@@ -975,8 +1019,9 @@
       document.getElementById('homeForm').reset();
       document.getElementById('homeId').value = '';
       primaryImageUrl = '';
-      galleryImageUrls = [];
-      displayPrimaryPreview('');
+      primaryImageFilename = '';
+      galleryImagesData = [];
+      displayPrimaryPreview('', '');
       displayGalleryPreview();
       document.getElementById('primaryComplete').style.display = 'none';
       document.getElementById('galleryComplete').style.display = 'none';
@@ -1006,15 +1051,23 @@
       document.getElementById('features').value = (home.features || []).join('\n');
 
       primaryImageUrl = home.primaryImage;
-      galleryImageUrls = home.additionalImages || [];
-      displayPrimaryPreview(primaryImageUrl);
+      primaryImageFilename = 'existing-image.jpg'; // For existing images
+      
+      // Convert gallery URLs to data structure with placeholder filenames
+      galleryImagesData = (home.additionalImages || []).map((url, index) => ({
+        url: url,
+        filename: `existing-${index + 1}.jpg`
+      }));
+      
+      displayPrimaryPreview(primaryImageUrl, primaryImageFilename);
       displayGalleryPreview();
       
       // Show completion indicators if images exist
       if (primaryImageUrl) {
         document.getElementById('primaryComplete').style.display = 'flex';
       }
-      if (galleryImageUrls.length > 0) {
+      if (galleryImagesData.length > 0) {
+        document.getElementById('galleryComplete').innerHTML = `✓ ${galleryImagesData.length} photo${galleryImagesData.length > 1 ? 's' : ''} uploaded!`;
         document.getElementById('galleryComplete').style.display = 'flex';
       }
       
@@ -1106,7 +1159,7 @@
           status: document.getElementById('status').value,
           price: price,
           primaryImage: primaryImageUrl,
-          additionalImages: galleryImageUrls,
+          additionalImages: galleryImagesData.map(img => img.url),
           features: document.getElementById('features').value
             .split('\n')
             .map(f => f.trim())
