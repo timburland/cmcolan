@@ -237,6 +237,8 @@
       transition: opacity 1.2s ease-in-out;
       background-size: cover;
       background-position: center;
+      display: block;
+      cursor: pointer;
     }
 
     .hero-slide.active {
@@ -649,13 +651,8 @@
 
     <!-- Slideshow Section -->
     <div class="slideshow-section">
-      <div class="slideshow-container">
-        <div class="hero-slide active" style="background-image: url('home_1.jpg')"></div>
-        <div class="hero-slide" style="background-image: url('home_2.jpg')"></div>
-        <div class="hero-slide" style="background-image: url('home_3.jpg')"></div>
-        <div class="hero-slide" style="background-image: url('home_4.jpg')"></div>
-        <div class="hero-slide" style="background-image: url('home_5.jpg')"></div>
-        <div class="hero-slide" style="background-image: url('home_6.jpg')"></div>
+      <div class="slideshow-container" id="slideshowContainer">
+        <!-- Slides will be loaded dynamically from sold homes -->
       </div>
 
       <!-- Navigation Buttons -->
@@ -671,13 +668,8 @@
       </button>
 
       <!-- Slide Indicators -->
-      <div class="slide-indicators">
-        <span class="indicator active" onclick="goToSlide(0)"></span>
-        <span class="indicator" onclick="goToSlide(1)"></span>
-        <span class="indicator" onclick="goToSlide(2)"></span>
-        <span class="indicator" onclick="goToSlide(3)"></span>
-        <span class="indicator" onclick="goToSlide(4)"></span>
-        <span class="indicator" onclick="goToSlide(5)"></span>
+      <div class="slide-indicators" id="slideIndicators">
+        <!-- Indicators will be generated dynamically -->
       </div>
     </div>
   </section>
@@ -841,14 +833,69 @@
       navMenu.classList.toggle("active");
     }
 
-    // Slideshow functionality
+    // Slideshow functionality - Dynamic loading from sold homes
     let currentSlide = 0;
     let autoSlideInterval;
-    const slides = document.querySelectorAll('.hero-slide');
-    const indicators = document.querySelectorAll('.indicator');
-    const totalSlides = slides.length;
+    let slides = [];
+    let indicators = [];
+    let totalSlides = 0;
+    let soldHomes = [];
+
+    // Load sold homes and initialize slideshow
+    async function loadSlideshowHomes() {
+      try {
+        const response = await fetch('/api/get-homes');
+        if (response.ok) {
+          const data = await response.json();
+          soldHomes = (data.items || []).filter(h => h.status === 'Sold');
+        }
+      } catch (error) {
+        console.error('Error loading homes for slideshow:', error);
+      }
+
+      // Fallback to static images if no sold homes
+      if (soldHomes.length === 0) {
+        soldHomes = [
+          { id: 'static1', primaryImage: 'home_1.jpg', headline: 'Custom Home' },
+          { id: 'static2', primaryImage: 'home_2.jpg', headline: 'Custom Home' },
+          { id: 'static3', primaryImage: 'home_3.jpg', headline: 'Custom Home' },
+          { id: 'static4', primaryImage: 'home_4.jpg', headline: 'Custom Home' },
+          { id: 'static5', primaryImage: 'home_5.jpg', headline: 'Custom Home' },
+          { id: 'static6', primaryImage: 'home_6.jpg', headline: 'Custom Home' }
+        ];
+      }
+
+      // Create slides HTML
+      const slideshowContainer = document.getElementById('slideshowContainer');
+      const slideIndicators = document.getElementById('slideIndicators');
+
+      slideshowContainer.innerHTML = soldHomes.map((home, index) => `
+        <a href="${home.id.startsWith('static') ? '#gallery' : 'home-details.html?id=' + home.id}" 
+           class="hero-slide ${index === 0 ? 'active' : ''}" 
+           style="background-image: url('${home.primaryImage}')"
+           aria-label="View ${home.headline}">
+        </a>
+      `).join('');
+
+      slideIndicators.innerHTML = soldHomes.map((_, index) => `
+        <span class="indicator ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></span>
+      `).join('');
+
+      // Update references
+      slides = document.querySelectorAll('.hero-slide');
+      indicators = document.querySelectorAll('.indicator');
+      totalSlides = slides.length;
+
+      // Initialize slideshow
+      if (totalSlides > 0) {
+        showSlide(0);
+        startAutoSlide();
+      }
+    }
 
     function showSlide(index) {
+      if (totalSlides === 0) return;
+      
       // Wrap around
       if (index >= totalSlides) currentSlide = 0;
       else if (index < 0) currentSlide = totalSlides - 1;
@@ -883,12 +930,22 @@
     function startAutoSlide() {
       autoSlideInterval = setInterval(() => {
         showSlide(currentSlide + 1);
-      }, 6000);
+      }, 6000); // Auto-advance every 6 seconds
     }
 
-    // Initialize slideshow
-    showSlide(0);
-    startAutoSlide();
+    // Load slideshow on page load
+    loadSlideshowHomes();
 
     // Pause auto-slide on hover
-    const slideshowSection = document.querySelector('.slidesho
+    const slideshowSection = document.querySelector('.slideshow-section');
+    if (slideshowSection) {
+      slideshowSection.addEventListener('mouseenter', () => {
+        clearInterval(autoSlideInterval);
+      });
+      slideshowSection.addEventListener('mouseleave', () => {
+        startAutoSlide();
+      });
+    }
+  </script>
+</body>
+</html>

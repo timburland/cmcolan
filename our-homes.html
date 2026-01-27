@@ -418,13 +418,6 @@
   <!-- Homes Section -->
   <section class="homes-section">
     <div class="container">
-      <div class="filter-bar">
-        <button class="filter-btn active" data-filter="all">All Homes</button>
-        <button class="filter-btn" data-filter="For Sale">For Sale</button>
-        <button class="filter-btn" data-filter="POA">POA</button>
-        <button class="filter-btn" data-filter="Sold">Sold</button>
-      </div>
-
       <div id="homesGrid" class="homes-grid"></div>
     </div>
   </section>
@@ -436,7 +429,6 @@
 
   <script>
     let allHomes = [];
-    let currentFilter = 'all';
 
     // Load homes data
     async function loadHomes() {
@@ -508,16 +500,6 @@
         `;
       }).join('');
     }
-
-    // Filter functionality
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.dataset.filter;
-        renderHomes();
-      });
-    });
 
     // Initialize
     loadHomes();
