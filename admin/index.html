@@ -332,13 +332,42 @@
 
     .uploading-indicator {
       display: none;
-      color: var(--accent-gold);
-      font-weight: 600;
-      margin-top: 0.5rem;
+      margin-top: 1rem;
     }
 
     .uploading-indicator.active {
       display: block;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 30px;
+      background: #e5e5e5;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-gold), #d4a76a);
+      width: 0%;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .upload-complete {
+      color: #28a745;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     @media (max-width: 768px) {
@@ -401,7 +430,14 @@
             <div class="upload-text">Upload Main Property Photo</div>
             <div class="upload-subtext">Click to select from your computer</div>
           </div>
-          <div class="uploading-indicator" id="primaryUploading">Uploading...</div>
+          <div class="uploading-indicator" id="primaryUploading">
+            <div class="progress-bar-container">
+              <div class="progress-bar" id="primaryProgress">0%</div>
+            </div>
+          </div>
+          <div class="upload-complete" id="primaryComplete" style="display: none;">
+            ✓ Uploaded successfully!
+          </div>
           <div id="primaryPreview" class="image-preview-grid"></div>
 
           <div class="upload-box" id="galleryUpload" onclick="document.getElementById('galleryImageInput').click()" style="margin-top: 1rem;">
@@ -410,15 +446,22 @@
             <div class="upload-text">Upload Additional Photos (Optional)</div>
             <div class="upload-subtext">You can select multiple images</div>
           </div>
-          <div class="uploading-indicator" id="galleryUploading">Uploading...</div>
+          <div class="uploading-indicator" id="galleryUploading">
+            <div class="progress-bar-container">
+              <div class="progress-bar" id="galleryProgress">0%</div>
+            </div>
+          </div>
+          <div class="upload-complete" id="galleryComplete" style="display: none;">
+            ✓ All photos uploaded successfully!
+          </div>
           <div id="galleryPreview" class="image-preview-grid"></div>
         </div>
 
         <!-- Property Details -->
         <div class="form-group">
-          <label for="headline">Property Headline *</label>
-          <input type="text" id="headline" required placeholder="e.g., Stunning Modern Home in Bethesda">
-          <small>This will be the main title for the property</small>
+          <label for="headline">Property Headline</label>
+          <input type="text" id="headline" placeholder="e.g., Stunning Modern Home in Bethesda">
+          <small>Optional - Leave blank to use the full address as the headline</small>
         </div>
 
         <div class="form-row">
@@ -444,9 +487,9 @@
         </div>
 
         <div class="form-group">
-          <label for="description">Property Description *</label>
-          <textarea id="description" required placeholder="Describe the property in a few sentences..."></textarea>
-          <small>Keep it brief - highlight the best features</small>
+          <label for="description">Property Description</label>
+          <textarea id="description" placeholder="Describe the property in a few sentences..."></textarea>
+          <small>Optional - Highlight the best features</small>
         </div>
 
         <div class="form-row">
@@ -482,8 +525,8 @@
           </div>
           <div class="form-group">
             <label for="price">Price (optional)</label>
-            <input type="text" id="price" placeholder="e.g., $2,500,000">
-            <small>Leave blank if status is POA</small>
+            <input type="text" id="price" placeholder="2500000" oninput="formatPrice(this)">
+            <small>Leave blank if status is POA - numbers only, we'll add $ and commas</small>
           </div>
         </div>
 
@@ -556,7 +599,19 @@
       }
 
       document.getElementById('primaryUploading').classList.add('active');
+      document.getElementById('primaryComplete').style.display = 'none';
       document.getElementById('primaryUpload').classList.add('uploading');
+      
+      // Simulate progress
+      const progressBar = document.getElementById('primaryProgress');
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 10;
+        if (progress <= 90) {
+          progressBar.style.width = progress + '%';
+          progressBar.textContent = progress + '%';
+        }
+      }, 100);
 
       try {
         const reader = new FileReader();
@@ -575,18 +630,28 @@
 
           const result = await response.json();
           
+          clearInterval(progressInterval);
+          progressBar.style.width = '100%';
+          progressBar.textContent = '100%';
+          
           if (result.success) {
             primaryImageUrl = result.url;
             displayPrimaryPreview(result.url);
+            
+            setTimeout(() => {
+              document.getElementById('primaryUploading').classList.remove('active');
+              document.getElementById('primaryComplete').style.display = 'flex';
+            }, 500);
           } else {
             alert('Failed to upload image: ' + result.error);
+            document.getElementById('primaryUploading').classList.remove('active');
           }
 
-          document.getElementById('primaryUploading').classList.remove('active');
           document.getElementById('primaryUpload').classList.remove('uploading');
         };
         reader.readAsDataURL(file);
       } catch (error) {
+        clearInterval(progressInterval);
         alert('Error uploading image: ' + error.message);
         document.getElementById('primaryUploading').classList.remove('active');
         document.getElementById('primaryUpload').classList.remove('uploading');
@@ -595,9 +660,15 @@
 
     async function handleGalleryImages(event) {
       const files = Array.from(event.target.files);
+      if (files.length === 0) return;
       
       document.getElementById('galleryUploading').classList.add('active');
+      document.getElementById('galleryComplete').style.display = 'none';
       document.getElementById('galleryUpload').classList.add('uploading');
+
+      const progressBar = document.getElementById('galleryProgress');
+      let uploadedCount = 0;
+      const totalFiles = files.length;
 
       for (const file of files) {
         if (!file.type.startsWith('image/')) continue;
@@ -624,13 +695,25 @@
           if (result.success) {
             galleryImageUrls.push(result.url);
           }
+          
+          uploadedCount++;
+          const progress = Math.round((uploadedCount / totalFiles) * 100);
+          progressBar.style.width = progress + '%';
+          progressBar.textContent = `${uploadedCount}/${totalFiles} photos`;
+          
         } catch (error) {
           console.error('Error uploading image:', error);
+          uploadedCount++;
         }
       }
 
       displayGalleryPreview();
-      document.getElementById('galleryUploading').classList.remove('active');
+      
+      setTimeout(() => {
+        document.getElementById('galleryUploading').classList.remove('active');
+        document.getElementById('galleryComplete').style.display = 'flex';
+      }, 500);
+      
       document.getElementById('galleryUpload').classList.remove('uploading');
     }
 
@@ -664,11 +747,35 @@
       primaryImageUrl = '';
       displayPrimaryPreview('');
       document.getElementById('primaryImageInput').value = '';
+      document.getElementById('primaryComplete').style.display = 'none';
     }
 
     function removeGalleryImage(index) {
       galleryImageUrls.splice(index, 1);
       displayGalleryPreview();
+      if (galleryImageUrls.length === 0) {
+        document.getElementById('galleryComplete').style.display = 'none';
+      }
+    }
+
+    // Price formatting
+    function formatPrice(input) {
+      // Remove all non-digits
+      let value = input.value.replace(/[^\d]/g, '');
+      
+      // Format with commas
+      if (value) {
+        value = parseInt(value).toLocaleString('en-US');
+        input.value = '$' + value;
+      } else {
+        input.value = '';
+      }
+    }
+
+    // Generate headline from address if not provided
+    function generateHeadline(street, city, state, zip) {
+      const parts = [street, city, state, zip].filter(p => p && p.trim());
+      return parts.join(', ');
     }
 
     // CRUD Operations
@@ -748,6 +855,8 @@
       galleryImageUrls = [];
       displayPrimaryPreview('');
       displayGalleryPreview();
+      document.getElementById('primaryComplete').style.display = 'none';
+      document.getElementById('galleryComplete').style.display = 'none';
       document.getElementById('formMessage').style.display = 'none';
       document.getElementById('homeModal').classList.add('active');
     }
@@ -764,7 +873,7 @@
       document.getElementById('city').value = home.city;
       document.getElementById('state').value = home.state;
       document.getElementById('zip').value = home.zip || '';
-      document.getElementById('description').value = home.description;
+      document.getElementById('description').value = home.description || '';
       document.getElementById('bedrooms').value = home.bedrooms;
       document.getElementById('bathrooms').value = home.bathrooms;
       document.getElementById('parking').value = home.parking || '';
@@ -777,6 +886,15 @@
       galleryImageUrls = home.additionalImages || [];
       displayPrimaryPreview(primaryImageUrl);
       displayGalleryPreview();
+      
+      // Show completion indicators if images exist
+      if (primaryImageUrl) {
+        document.getElementById('primaryComplete').style.display = 'flex';
+      }
+      if (galleryImageUrls.length > 0) {
+        document.getElementById('galleryComplete').style.display = 'flex';
+      }
+      
       document.getElementById('formMessage').style.display = 'none';
 
       document.getElementById('homeModal').classList.add('active');
@@ -814,20 +932,42 @@
       submitBtn.textContent = 'Publishing...';
 
       try {
+        const street = document.getElementById('street').value;
+        const city = document.getElementById('city').value;
+        const state = document.getElementById('state').value;
+        const zip = document.getElementById('zip').value;
+        
+        // Use provided headline or generate from address
+        let headline = document.getElementById('headline').value.trim();
+        if (!headline) {
+          headline = generateHeadline(street, city, state, zip);
+        }
+        
+        // Use provided description or empty string
+        const description = document.getElementById('description').value.trim() || '';
+        
+        // Format price - remove $ and commas for storage
+        let price = document.getElementById('price').value;
+        if (price) {
+          price = price.replace(/[$,]/g, '');
+          // Re-format for display
+          price = '$' + parseInt(price).toLocaleString('en-US');
+        }
+
         const formData = {
           id: document.getElementById('homeId').value || generateId(),
-          headline: document.getElementById('headline').value,
-          street: document.getElementById('street').value,
-          city: document.getElementById('city').value,
-          state: document.getElementById('state').value,
-          zip: document.getElementById('zip').value,
-          description: document.getElementById('description').value,
+          headline: headline,
+          street: street,
+          city: city,
+          state: state,
+          zip: zip,
+          description: description,
           bedrooms: parseInt(document.getElementById('bedrooms').value),
           bathrooms: parseFloat(document.getElementById('bathrooms').value),
           parking: parseInt(document.getElementById('parking').value) || 0,
           garage: parseInt(document.getElementById('garage').value) || 0,
           status: document.getElementById('status').value,
-          price: document.getElementById('price').value,
+          price: price,
           primaryImage: primaryImageUrl,
           additionalImages: galleryImageUrls,
           features: document.getElementById('features').value
