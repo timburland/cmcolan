@@ -487,7 +487,7 @@
 
     /* Service Area Map Section */
     .map-section {
-      padding: 8rem 4rem;
+      padding: 4rem 4rem 8rem;
       background: var(--bg-white);
     }
 
@@ -720,7 +720,7 @@
 
       /* Map section mobile styles */
       .map-section {
-        padding: 4rem 2rem;
+        padding: 3rem 2rem 4rem;
       }
 
       .map-intro h2 {
@@ -1142,14 +1142,27 @@
         const response = await fetch('/api/get-homes');
         if (response.ok) {
           const data = await response.json();
+          console.log('Raw homes data:', data);
+          
+          // Try to get sold homes first, then all homes if none are sold
           homesData = (data.items || []).filter(h => h.status === 'Sold');
           
-          console.log(`Found ${homesData.length} sold homes for map`);
+          if (homesData.length === 0) {
+            console.warn('No sold homes found, showing all homes on map');
+            homesData = data.items || [];
+          }
+          
+          console.log(`Found ${homesData.length} homes for map:`, homesData);
+          
+          if (homesData.length === 0) {
+            console.error('No homes data available for map');
+            return;
+          }
           
           // Add markers for each home with delay to avoid rate limiting
           for (let i = 0; i < homesData.length; i++) {
             const home = homesData[i];
-            console.log(`Geocoding ${i + 1}/${homesData.length}: ${home.street}, ${home.city}`);
+            console.log(`Geocoding ${i + 1}/${homesData.length}: ${home.street}, ${home.city}, ${home.state} ${home.zip}`);
             await addMarker(home);
             
             // Wait 1 second between requests to respect Nominatim rate limits
@@ -1160,12 +1173,14 @@
 
           // Fit map to show all markers if any exist
           if (markers.length > 0) {
-            console.log(`Successfully placed ${markers.length} markers on map`);
+            console.log(`✓ Successfully placed ${markers.length} markers on map`);
             const group = new L.featureGroup(markers);
             map.fitBounds(group.getBounds().pad(0.1));
           } else {
-            console.warn('No markers were placed on the map');
+            console.error('✗ No markers were placed on the map. Check geocoding errors above.');
           }
+        } else {
+          console.error('Failed to fetch homes:', response.status);
         }
       } catch (error) {
         console.error('Error loading homes for map:', error);
