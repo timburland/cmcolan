@@ -1124,8 +1124,8 @@
     let homesData = [];
 
     async function initMap() {
-      // Create map centered on Montgomery County, MD
-      map = L.map('map').setView([39.1434, -77.2014], 11);
+      // Create map centered on Bethesda, MD
+      map = L.map('map').setView([38.9807, -77.0947], 12);
 
       // Add OpenStreetMap tiles
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1144,15 +1144,27 @@
           const data = await response.json();
           homesData = (data.items || []).filter(h => h.status === 'Sold');
           
-          // Add markers for each home
-          for (const home of homesData) {
+          console.log(`Found ${homesData.length} sold homes for map`);
+          
+          // Add markers for each home with delay to avoid rate limiting
+          for (let i = 0; i < homesData.length; i++) {
+            const home = homesData[i];
+            console.log(`Geocoding ${i + 1}/${homesData.length}: ${home.street}, ${home.city}`);
             await addMarker(home);
+            
+            // Wait 1 second between requests to respect Nominatim rate limits
+            if (i < homesData.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
           }
 
           // Fit map to show all markers if any exist
           if (markers.length > 0) {
+            console.log(`Successfully placed ${markers.length} markers on map`);
             const group = new L.featureGroup(markers);
             map.fitBounds(group.getBounds().pad(0.1));
+          } else {
+            console.warn('No markers were placed on the map');
           }
         }
       } catch (error) {
@@ -1192,6 +1204,10 @@
           
           marker.bindPopup(popupContent);
           markers.push(marker);
+          
+          console.log(`✓ Marker placed for: ${home.headline}`);
+        } else {
+          console.warn(`✗ Could not place marker for: ${home.headline} - geocoding failed`);
         }
       } catch (error) {
         console.error(`Error geocoding ${address}:`, error);
@@ -1200,24 +1216,39 @@
 
     async function geocodeAddress(address) {
       try {
-        // Use Nominatim geocoding service (free, no API key required)
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+        // Use Nominatim geocoding service with Maryland constraint for better results
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=us&state=Maryland&limit=1`;
+        
+        console.log(`Geocoding: ${address}`);
+        
         const response = await fetch(url, {
           headers: {
             'User-Agent': 'CMConlanWebsite/1.0'
           }
         });
         
+        if (!response.ok) {
+          console.error(`Geocoding HTTP error: ${response.status}`);
+          return null;
+        }
+        
         const data = await response.json();
         
         if (data && data.length > 0) {
-          return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          console.log(`✓ Geocoded: [${lat}, ${lon}] - ${data[0].display_name}`);
+          return [lat, lon];
+        } else {
+          console.warn(`✗ No results found for: ${address}`);
         }
         
         return null;
       } catch (error) {
-        console.error('Geocoding error:', error);
+        console.error(`✗ Geocoding error for ${address}:`, error);
         return null;
+      }
+    }
       }
     }
 
