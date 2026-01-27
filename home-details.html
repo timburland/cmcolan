@@ -502,10 +502,12 @@
         <img src="${home.primaryImage}" alt="${home.headline}" class="main-image">
 
         <div class="content-grid">
+          ${home.description ? `
           <div class="description">
-            <h2>Description</h2>
+            <h2>About This Property</h2>
             <p>${home.description}</p>
           </div>
+          ` : ''}
 
           <div class="property-features">
             <h2>Property Features</h2>
@@ -521,7 +523,7 @@
 
         ${allImages.length > 1 ? `
           <div class="photo-gallery">
-            <h2>Photo Gallery</h2>
+            <h2>Renderings & Floor Plans</h2>
             <div class="gallery-grid">
               ${allImages.map(img => `
                 <div class="gallery-item">

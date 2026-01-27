@@ -164,25 +164,33 @@
     }
 
     .home-card {
-      border: 1px solid var(--border-light);
+      display: grid;
+      grid-template-columns: 45% 55%;
       background: white;
       overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--border-light);
+      margin-bottom: 2rem;
     }
 
     .home-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px);
     }
 
     .home-media {
       position: relative;
       overflow: hidden;
+      height: 100%;
+      min-height: 400px;
     }
 
     .home-media img {
       width: 100%;
-      height: 380px;
+      height: 100%;
       object-fit: cover;
       display: block;
       transition: transform 0.5s ease;
@@ -192,29 +200,79 @@
       transform: scale(1.05);
     }
 
+    /* Hover Overlay */
+    .home-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0);
+      transition: background 0.3s ease;
+    }
+
+    .home-card:hover .home-media::after {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .more-info-overlay {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      color: var(--primary-dark);
+      padding: 0.875rem 1.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .home-card:hover .more-info-overlay {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .more-info-overlay svg {
+      width: 20px;
+      height: 20px;
+    }
+
     .home-badge {
       position: absolute;
       top: 14px;
       left: 14px;
-      background: rgba(0, 0, 0, 0.82);
+      background: rgba(220, 53, 69, 0.95);
       color: white;
       padding: 0.5rem 0.75rem;
       font-size: 0.8rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       font-weight: 600;
+      z-index: 10;
     }
 
     .home-badge.sold {
-      background: rgba(220, 53, 69, 0.9);
+      background: rgba(220, 53, 69, 0.95);
+    }
+
+    .home-badge.for-sale {
+      background: rgba(40, 167, 69, 0.95);
     }
 
     .home-badge.poa {
-      background: rgba(0, 123, 255, 0.9);
+      background: rgba(193, 154, 91, 0.95);
     }
 
     .home-body {
-      padding: 1.5rem 1.5rem 1.75rem;
+      padding: 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .home-title {
@@ -304,8 +362,16 @@
         grid-template-columns: 1fr;
       }
 
-      .home-media img {
-        height: 320px;
+      .home-card {
+        grid-template-columns: 1fr;
+      }
+
+      .home-media {
+        min-height: 300px;
+      }
+
+      .home-body {
+        padding: 1.5rem;
       }
 
       .page-header h1 {
@@ -334,8 +400,8 @@
         <ul class="nav-menu">
           <li><a href="index.html">Home</a></li>
           <li><a href="index.html#gallery">Photo Gallery</a></li>
-          <li><a href="our-homes.html">Our Homes</a></li>
-          <li><a href="coming-soon.html" class="active">Coming Soon</a></li>
+          <li><a href="our-homes.html" class="active">Coming Soon</a></li>
+          <li><a href="coming-soon.html">Coming Soon</a></li>
           <li><a href="index.html#about">About</a></li>
           <li><a href="index.html#contact">Contact</a></li>
         </ul>
@@ -346,7 +412,7 @@
   <!-- Page Header -->
   <section class="page-header">
     <h1>Coming Soon</h1>
-    <p>Homes currently available for sale in Montgomery County, Maryland</p>
+    <p>Browse our portfolio of homes currently available for sale throughout Montgomery County, Maryland</p>
   </section>
 
   <!-- Homes Section -->
@@ -422,25 +488,23 @@
         const address = `${home.street}, ${home.city}, ${home.state} ${home.zip || ''}`.trim();
 
         return `
-          <article class="home-card">
+          <a href="home-details.html?id=${home.id}" class="home-card">
             <div class="home-media">
               <img src="${home.primaryImage}" alt="${home.headline}" loading="lazy">
               ${badge ? `<div class="home-badge ${badgeClass}">${badge}</div>` : ''}
+              <div class="more-info-overlay">
+                More Information
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </div>
             </div>
             <div class="home-body">
               <h3 class="home-title">${home.headline}</h3>
               <p class="home-address">${address}</p>
-              <div class="home-specs">
-                <span class="home-spec">🛏️ ${home.bedrooms} bed</span>
-                <span class="home-spec">🛁 ${home.bathrooms} bath</span>
-                ${home.parking ? `<span class="home-spec">🚗 ${home.parking} parking</span>` : ''}
-              </div>
-              <p class="home-desc">${home.description}</p>
-              <a class="home-cta" href="home-details.html?id=${home.id}">
-                ${home.status === 'Sold' ? 'View Details' : 'Learn More'}
-              </a>
+              ${home.description ? `<p class="home-desc">${home.description}</p>` : ''}
             </div>
-          </article>
+          </a>
         `;
       }).join('');
     }
