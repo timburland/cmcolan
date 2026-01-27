@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Details | C. M. Conlan Contractors & Builders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-dark: #1a2332;
+      --accent-gold: #c19a5b;
+      --text-dark: #2d2d2d;
+      --text-light: #666666;
+      --bg-cream: #f8f6f3;
+      --bg-white: #ffffff;
+      --border-light: #e5e5e5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Montserrat", sans-serif;
+      color: var(--text-dark);
+      line-height: 1.7;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: "Cormorant Garamond", serif;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--primary-dark);
+    }
+
+    /* Header - same as other pages */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-white);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 4rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-decoration: none;
+    }
+
+    .logo-image {
+      height: 50px;
+      width: auto;
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .nav-menu a {
+      color: var(--text-dark);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-menu a:hover {
+      color: var(--accent-gold);
+    }
+
+    /* Back Button */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 100px 0 2rem 4rem;
+      color: var(--text-dark);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: var(--accent-gold);
+    }
+
+    /* Property Details Section */
+    .property-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 4rem 4rem;
+    }
+
+    .property-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: start;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--border-light);
+    }
+
+    .property-title h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .property-address {
+      font-size: 1.2rem;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+
+    .property-specs {
+      display: flex;
+      gap: 2rem;
+      font-size: 1.1rem;
+      color: var(--text-dark);
+    }
+
+    .spec-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .property-status {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-radius: 4px;
+    }
+
+    .property-status.for-sale {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .property-status.sold {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .property-status.poa {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    /* Main Image */
+    .main-image {
+      width: 100%;
+      height: 600px;
+      object-fit: cover;
+      margin-bottom: 3rem;
+      border-radius: 8px;
+    }
+
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 4rem;
+      margin-bottom: 4rem;
+    }
+
+    .description h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .description p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+
+    .property-features {
+      background: var(--bg-cream);
+      padding: 2rem;
+      border-radius: 8px;
+    }
+
+    .property-features h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .features-list {
+      list-style: none;
+    }
+
+    .features-list li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .features-list li:last-child {
+      border-bottom: none;
+    }
+
+    .features-list li::before {
+      content: "✓";
+      color: var(--accent-gold);
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    /* Photo Gallery */
+    .photo-gallery {
+      margin-bottom: 4rem;
+    }
+
+    .photo-gallery h2 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      height: 300px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.02);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Contact CTA */
+    .contact-cta {
+      background: var(--primary-dark);
+      color: white;
+      padding: 4rem 3rem;
+      text-align: center;
+      border-radius: 8px;
+      margin-bottom: 4rem;
+    }
+
+    .contact-cta h2 {
+      font-size: 2.5rem;
+      color: white;
+      margin-bottom: 1rem;
+    }
+
+    .contact-cta p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: var(--accent-gold);
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      border: 2px solid var(--accent-gold);
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      border-radius: 4px;
+    }
+
+    .btn:hover {
+      background: transparent;
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid white;
+    }
+
+    .btn-outline:hover {
+      background: white;
+      color: var(--primary-dark);
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--primary-dark);
+      color: white;
+      padding: 3rem 4rem;
+      text-align: center;
+    }
+
+    .footer p {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .footer a {
+      color: var(--accent-gold);
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      .property-container {
+        padding: 0 2rem 2rem;
+      }
+
+      .back-link {
+        margin-left: 2rem;
+      }
+
+      .property-header {
+        grid-template-columns: 1fr;
+      }
+
+      .property-title h1 {
+        font-size: 2rem;
+      }
+
+      .main-image {
+        height: 400px;
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery-item {
+        height: 250px;
+      }
+
+      .nav-container {
+        padding: 1rem 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="header">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <img src="conlanlogo.png" alt="C. M. Conlan Logo" class="logo-image">
+        <span>C. M. Conlan Contractors &amp; Builders</span>
+      </a>
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#gallery">Photo Gallery</a></li>
+          <li><a href="available-homes.html">Available Homes</a></li>
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <a href="available-homes.html" class="back-link">← Back to Available Homes</a>
+
+  <!-- Property Details -->
+  <div class="property-container" id="propertyContainer">
+    <!-- Content will be loaded here by JavaScript -->
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 C. M. Conlan Contractors &amp; Builders | <a href="index.html#contact">Contact Us</a></p>
+  </footer>
+
+  <script>
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    async function loadPropertyDetails() {
+      const homeId = getUrlParameter('id');
+      
+      if (!homeId) {
+        document.getElementById('propertyContainer').innerHTML = `
+          <div style="text-align: center; padding: 4rem;">
+            <h2>Property not found</h2>
+            <p style="margin: 1rem 0 2rem;">The property you're looking for doesn't exist.</p>
+            <a href="available-homes.html" class="btn">Back to Available Homes</a>
+          </div>
+        `;
+        return;
+      }
+
+      let home = null;
+
+      // Fetch from API
+      try {
+        const response = await fetch('/api/get-homes');
+        if (response.ok) {
+          const data = await response.json();
+          home = (data.items || []).find(h => h.id === homeId);
+        }
+      } catch (error) {
+        console.error('Error loading home:', error);
+      }
+
+      // Fallback to localStorage for local testing
+      if (!home) {
+        const localData = localStorage.getItem('cmconlan_homes');
+        if (localData) {
+          const homes = JSON.parse(localData);
+          home = homes.find(h => h.id === homeId);
+        }
+      }
+
+      if (!home) {
+        document.getElementById('propertyContainer').innerHTML = `
+          <div style="text-align: center; padding: 4rem;">
+            <h2>Property not found</h2>
+            <p style="margin: 1rem 0 2rem;">The property you're looking for doesn't exist.</p>
+            <a href="available-homes.html" class="btn">Back to Available Homes</a>
+          </div>
+        `;
+        return;
+      }
+
+      renderProperty(home);
+    }
+
+    function renderProperty(home) {
+      const statusClass = home.status.toLowerCase().replace(' ', '-');
+      const allImages = [home.primaryImage, ...(home.additionalImages || [])];
+
+      document.getElementById('propertyContainer').innerHTML = `
+        <div class="property-header">
+          <div class="property-title">
+            <h1>${home.headline}</h1>
+            <p class="property-address">${home.street}, ${home.city}, ${home.state} ${home.zip || ''}</p>
+            <div class="property-specs">
+              <span class="spec-item">🛏️ ${home.bedrooms} Bedrooms</span>
+              <span class="spec-item">🛁 ${home.bathrooms} Bathrooms</span>
+              ${home.parking ? `<span class="spec-item">🚗 ${home.parking} Parking Spaces</span>` : ''}
+            </div>
+          </div>
+          <div>
+            <span class="property-status ${statusClass}">${home.status}</span>
+            ${home.price ? `<p style="font-size: 1.5rem; font-weight: 600; margin-top: 1rem;">${home.price}</p>` : ''}
+          </div>
+        </div>
+
+        <img src="${home.primaryImage}" alt="${home.headline}" class="main-image">
+
+        <div class="content-grid">
+          <div class="description">
+            <h2>Description</h2>
+            <p>${home.description}</p>
+          </div>
+
+          <div class="property-features">
+            <h2>Property Features</h2>
+            <ul class="features-list">
+              ${home.bedrooms ? `<li>${home.bedrooms} Bedrooms</li>` : ''}
+              ${home.bathrooms ? `<li>${home.bathrooms} Bathrooms</li>` : ''}
+              ${home.parking ? `<li>${home.parking} Parking Spaces</li>` : ''}
+              ${home.garage ? `<li>${home.garage} Car Garage</li>` : ''}
+              ${(home.features || []).map(f => `<li>${f}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+
+        ${allImages.length > 1 ? `
+          <div class="photo-gallery">
+            <h2>Photo Gallery</h2>
+            <div class="gallery-grid">
+              ${allImages.map(img => `
+                <div class="gallery-item">
+                  <img src="${img}" alt="Property photo">
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="contact-cta">
+          <h2>Interested in This Property?</h2>
+          <p>Contact us today to schedule a viewing or learn more about this exceptional home.</p>
+          <div class="cta-buttons">
+            <a href="index.html#contact" class="btn">Contact Us</a>
+            <a href="tel:301-983-1301" class="btn btn-outline">Call: 301-983-1301</a>
+          </div>
+        </div>
+      `;
+
+      // Update page title
+      document.title = `${home.headline} | C. M. Conlan Contractors & Builders`;
+    }
+
+    // Initialize
+    loadPropertyDetails();
+  </script>
+</body>
+</html>

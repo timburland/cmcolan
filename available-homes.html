@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Available Homes | C. M. Conlan Contractors & Builders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-dark: #1a2332;
+      --primary-navy: #2c4056;
+      --accent-gold: #c19a5b;
+      --accent-warm: #8b7355;
+      --text-dark: #2d2d2d;
+      --text-light: #666666;
+      --bg-cream: #f8f6f3;
+      --bg-white: #ffffff;
+      --border-light: #e5e5e5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Montserrat", sans-serif;
+      color: var(--text-dark);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: "Cormorant Garamond", serif;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--primary-dark);
+    }
+
+    /* Header Navigation - same as main site */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-white);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 4rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+
+    .logo-image {
+      height: 50px;
+      width: auto;
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .nav-menu a {
+      color: var(--text-dark);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: color 0.3s ease;
+    }
+
+    .nav-menu a:hover, .nav-menu a.active {
+      color: var(--accent-gold);
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-top: 80px;
+      background: var(--primary-dark);
+      color: white;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 3.5rem;
+      color: white;
+      margin-bottom: 1rem;
+    }
+
+    .page-header p {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Homes Section */
+    .homes-section {
+      padding: 6rem 4rem;
+      background: var(--bg-white);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      background: white;
+      border: 2px solid var(--border-light);
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      border-radius: 4px;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent-gold);
+      border-color: var(--accent-gold);
+      color: white;
+    }
+
+    .homes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2.5rem;
+    }
+
+    .home-card {
+      border: 1px solid var(--border-light);
+      background: white;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .home-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .home-media {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .home-media img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .home-card:hover .home-media img {
+      transform: scale(1.05);
+    }
+
+    .home-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(0, 0, 0, 0.82);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .home-badge.sold {
+      background: rgba(220, 53, 69, 0.9);
+    }
+
+    .home-badge.poa {
+      background: rgba(0, 123, 255, 0.9);
+    }
+
+    .home-body {
+      padding: 1.5rem 1.5rem 1.75rem;
+    }
+
+    .home-title {
+      font-size: 1.5rem;
+      line-height: 1.25;
+      margin: 0 0 0.75rem;
+    }
+
+    .home-address {
+      margin: 0 0 1rem;
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    .home-specs {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .home-spec {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .home-desc {
+      margin: 0 0 1.25rem;
+      color: var(--text-light);
+      line-height: 1.7;
+    }
+
+    .home-cta {
+      display: inline-block;
+      padding: 0.9rem 1.2rem;
+      background: var(--primary-dark);
+      color: white;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .home-cta:hover {
+      background: var(--accent-gold);
+      transform: translateY(-2px);
+    }
+
+    .no-homes {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-light);
+    }
+
+    .no-homes h3 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+
+    /* Footer - simplified version */
+    .footer {
+      background: var(--primary-dark);
+      color: white;
+      padding: 3rem 4rem;
+      text-align: center;
+    }
+
+    .footer p {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .footer a {
+      color: var(--accent-gold);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+      .homes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .home-media img {
+        height: 320px;
+      }
+
+      .page-header h1 {
+        font-size: 2.5rem;
+      }
+
+      .nav-container {
+        padding: 1rem 2rem;
+      }
+
+      .homes-section {
+        padding: 4rem 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="header">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <img src="conlanlogo.png" alt="C. M. Conlan Logo" class="logo-image">
+        <span>C. M. Conlan Contractors &amp; Builders</span>
+      </a>
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#gallery">Photo Gallery</a></li>
+          <li><a href="available-homes.html" class="active">Available Homes</a></li>
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <h1>Available Homes</h1>
+    <p>Explore our current portfolio of custom-built homes in Montgomery County, Maryland</p>
+  </section>
+
+  <!-- Homes Section -->
+  <section class="homes-section">
+    <div class="container">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">All Homes</button>
+        <button class="filter-btn" data-filter="For Sale">For Sale</button>
+        <button class="filter-btn" data-filter="POA">POA</button>
+        <button class="filter-btn" data-filter="Sold">Sold</button>
+      </div>
+
+      <div id="homesGrid" class="homes-grid"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 C. M. Conlan Contractors &amp; Builders | <a href="index.html#contact">Contact Us</a></p>
+  </footer>
+
+  <script>
+    let allHomes = [];
+    let currentFilter = 'all';
+
+    // Load homes data
+    async function loadHomes() {
+      try {
+        // Fetch from blob storage (or API endpoint that serves the data)
+        const response = await fetch('/api/get-homes');
+        
+        if (response.ok) {
+          const data = await response.json();
+          allHomes = data.items || [];
+        } else {
+          // Fallback to localStorage for local testing
+          const localData = localStorage.getItem('cmconlan_homes');
+          if (localData) {
+            allHomes = JSON.parse(localData);
+          } else {
+            allHomes = [];
+          }
+        }
+      } catch (error) {
+        console.error('Error loading homes:', error);
+        // Fallback to localStorage
+        const localData = localStorage.getItem('cmconlan_homes');
+        allHomes = localData ? JSON.parse(localData) : [];
+      }
+      
+      renderHomes();
+    }
+
+    function renderHomes() {
+      const grid = document.getElementById('homesGrid');
+      
+      // Filter homes
+      const filteredHomes = currentFilter === 'all' 
+        ? allHomes 
+        : allHomes.filter(h => h.status === currentFilter);
+
+      if (filteredHomes.length === 0) {
+        grid.innerHTML = `
+          <div class="no-homes" style="grid-column: 1 / -1;">
+            <h3>No homes available</h3>
+            <p>Please check back later for new listings.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filteredHomes.map(home => {
+        const badge = (home.status || '').toUpperCase();
+        const badgeClass = home.status.toLowerCase().replace(' ', '-');
+        const address = `${home.street}, ${home.city}, ${home.state} ${home.zip || ''}`.trim();
+
+        return `
+          <article class="home-card">
+            <div class="home-media">
+              <img src="${home.primaryImage}" alt="${home.headline}" loading="lazy">
+              ${badge ? `<div class="home-badge ${badgeClass}">${badge}</div>` : ''}
+            </div>
+            <div class="home-body">
+              <h3 class="home-title">${home.headline}</h3>
+              <p class="home-address">${address}</p>
+              <div class="home-specs">
+                <span class="home-spec">🛏️ ${home.bedrooms} bed</span>
+                <span class="home-spec">🛁 ${home.bathrooms} bath</span>
+                ${home.parking ? `<span class="home-spec">🚗 ${home.parking} parking</span>` : ''}
+              </div>
+              <p class="home-desc">${home.description}</p>
+              <a class="home-cta" href="home-details.html?id=${home.id}">
+                ${home.status === 'Sold' ? 'View Details' : 'Learn More'}
+              </a>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderHomes();
+      });
+    });
+
+    // Initialize
+    loadHomes();
+  </script>
+</body>
+</html>
