@@ -951,7 +951,7 @@
           <p>Bethesda, Maryland</p>
           <p>Office: 301-983-1301</p>
           <p>Fax: 301-983-2544</p>
-          <p>Email: <a href="mailto:chris@cmconlan.com">chris@cmconlan.com</a></p>
+          <p>Email: <a href="/cdn-cgi/l/email-protection#0d6e657f647e4d6e606e6263616c63236e6260"><span class="__cf_email__" data-cfemail="f09398829983b0939d939f9e9c919ede939f9d">[email&#160;protected]</span></a></p>
         </div>
 
         <div>
@@ -973,7 +973,7 @@
     </div>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener("click", function (e) {
@@ -1249,8 +1249,6 @@
         return null;
       }
     }
-      }
-    }
 
     // Update Google Maps and Apple Maps buttons
     function updateMapButtons() {
@@ -1258,7 +1256,7 @@
 
       // Create a multi-location Google Maps URL
       const googleMapsUrl = `https://www.google.com/maps/dir/${homesData.map(h => 
-        `${h.street}, ${h.city}, ${h.state} ${h.zip || ''}`
+        encodeURIComponent(`${h.street}, ${h.city}, ${h.state} ${h.zip || ''}`)
       ).join('/')}`;
       
       // For Apple Maps, we'll use the first home as center
