@@ -19,7 +19,7 @@ module.exports = async function (context, req) {
     }
 
     try {
-        const { imageData, fileName } = req.body;
+        const { imageData, fileName, address } = req.body;
 
         if (!imageData || !fileName) {
             context.res.status = 400;
@@ -39,8 +39,16 @@ module.exports = async function (context, req) {
         const base64Data = imageData.split(',')[1]; // Remove data:image/...;base64, prefix
         const buffer = Buffer.from(base64Data, 'base64');
 
+        // Create folder path from address if provided
+        let folderPath = '';
+        if (address && address.street && address.city && address.state && address.zip) {
+            // Sanitize address components for folder name
+            const sanitize = (str) => str.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_');
+            folderPath = `${sanitize(address.street)}_${sanitize(address.city)}_${sanitize(address.state)}_${sanitize(address.zip)}/`;
+        }
+
         // Generate unique filename
-        const uniqueFileName = `${Date.now()}_${fileName}`;
+        const uniqueFileName = `${folderPath}${Date.now()}_${fileName}`;
 
         // Upload to blob storage
         const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
