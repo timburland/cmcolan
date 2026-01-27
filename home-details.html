@@ -273,6 +273,111 @@
       object-fit: cover;
     }
 
+    /* Lightbox Modal */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .lightbox.active {
+      display: flex;
+      opacity: 1;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-content {
+      position: relative;
+      max-width: 90%;
+      max-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-image {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid white;
+      border-radius: 50%;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid white;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+
+    .lightbox-nav:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .lightbox-prev {
+      left: 20px;
+    }
+
+    .lightbox-next {
+      right: 20px;
+    }
+
+    .lightbox-counter {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
     /* Contact CTA */
     .contact-cta {
       background: var(--primary-dark);
@@ -385,6 +490,34 @@
 
       .nav-container {
         padding: 1rem 2rem;
+      }
+
+      /* Lightbox mobile styles */
+      .lightbox-close {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+      }
+
+      .lightbox-nav {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+
+      .lightbox-prev {
+        left: 10px;
+      }
+
+      .lightbox-next {
+        right: 10px;
+      }
+
+      .lightbox-counter {
+        font-size: 0.8rem;
+        padding: 0.4rem 1rem;
       }
     }
   </style>
@@ -560,6 +693,91 @@
 
     // Initialize
     loadPropertyDetails();
+
+    // Lightbox functionality
+    let currentImageIndex = 0;
+    let galleryImages = [];
+
+    function initLightbox() {
+      // Get all gallery images after they're loaded
+      const galleryItems = document.querySelectorAll('.gallery-item img');
+      galleryImages = Array.from(galleryItems).map(img => img.src);
+
+      // Add click handlers to all gallery items
+      galleryItems.forEach((img, index) => {
+        img.parentElement.addEventListener('click', () => {
+          openLightbox(index);
+        });
+      });
+    }
+
+    function openLightbox(index) {
+      currentImageIndex = index;
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightboxImg');
+      const counter = document.getElementById('lightboxCounter');
+
+      lightboxImg.src = galleryImages[index];
+      counter.textContent = `${index + 1} / ${galleryImages.length}`;
+      
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+
+    function closeLightbox() {
+      const lightbox = document.getElementById('lightbox');
+      lightbox.classList.remove('active');
+      document.body.style.overflow = ''; // Restore scrolling
+    }
+
+    function navigateLightbox(direction) {
+      currentImageIndex += direction;
+      
+      // Wrap around
+      if (currentImageIndex < 0) {
+        currentImageIndex = galleryImages.length - 1;
+      } else if (currentImageIndex >= galleryImages.length) {
+        currentImageIndex = 0;
+      }
+
+      const lightboxImg = document.getElementById('lightboxImg');
+      const counter = document.getElementById('lightboxCounter');
+      
+      lightboxImg.src = galleryImages[currentImageIndex];
+      counter.textContent = `${currentImageIndex + 1} / ${galleryImages.length}`;
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      const lightbox = document.getElementById('lightbox');
+      if (!lightbox.classList.contains('active')) return;
+
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') navigateLightbox(-1);
+      if (e.key === 'ArrowRight') navigateLightbox(1);
+    });
+
+    // Click outside to close
+    document.addEventListener('click', (e) => {
+      const lightbox = document.getElementById('lightbox');
+      if (e.target === lightbox) {
+        closeLightbox();
+      }
+    });
+
+    // Call initLightbox after images are loaded
+    setTimeout(initLightbox, 1000);
   </script>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">‹</button>
+    <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">›</button>
+    <div class="lightbox-content">
+      <img id="lightboxImg" class="lightbox-image" src="" alt="Full size image">
+    </div>
+    <div id="lightboxCounter" class="lightbox-counter">1 / 1</div>
+  </div>
 </body>
 </html>
