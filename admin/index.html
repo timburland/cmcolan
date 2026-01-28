@@ -1186,6 +1186,28 @@
           ctaUrl: `home-details.html?id=${document.getElementById('homeId').value || generateId()}`
         };
 
+        // Try to geocode the address and store coordinates
+        const fullAddress = `${street}, ${city}, ${state} ${zip}`.trim();
+        try {
+          const geocodeResponse = await fetch('/api/geocode-address', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address: fullAddress })
+          });
+          
+          if (geocodeResponse.ok) {
+            const geocodeData = await geocodeResponse.json();
+            if (geocodeData.success) {
+              formData.latitude = geocodeData.lat;
+              formData.longitude = geocodeData.lon;
+              console.log(`✓ Geocoded: [${geocodeData.lat}, ${geocodeData.lon}]`);
+            }
+          }
+        } catch (error) {
+          console.warn('Could not geocode address:', error);
+          // Continue without coordinates - not critical
+        }
+
         document.getElementById('step1').classList.remove('active');
         document.getElementById('step1').classList.add('complete');
 
