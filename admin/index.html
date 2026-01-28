@@ -148,9 +148,63 @@
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       display: grid;
-      grid-template-columns: 200px 1fr auto;
+      grid-template-columns: 40px 200px 1fr auto;
       gap: 1.5rem;
       align-items: center;
+      cursor: move;
+      transition: all 0.3s ease;
+    }
+
+    .home-item:hover {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .home-item.dragging {
+      opacity: 0.5;
+      transform: scale(0.98);
+    }
+
+    .home-item.drag-over {
+      border-top: 3px solid var(--accent-gold);
+    }
+
+    .drag-handle {
+      font-size: 1.5rem;
+      color: var(--text-light);
+      cursor: grab;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      align-items: center;
+      user-select: none;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .drag-dots {
+      width: 4px;
+      height: 4px;
+      background: var(--text-light);
+      border-radius: 50%;
+    }
+
+    .home-order-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: var(--accent-gold);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     .home-item img {
@@ -471,6 +525,16 @@
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.1); }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(400px); opacity: 0; }
     }
 
     kbd {
@@ -1106,9 +1170,17 @@
         return;
       }
 
-      container.innerHTML = homes.map(home => `
-        <div class="home-item">
-          <img src="${home.primaryImage}" alt="${home.headline}">
+      container.innerHTML = homes.map((home, index) => `
+        <div class="home-item" draggable="true" data-id="${home.id}" data-index="${index}">
+          <div class="drag-handle" title="Drag to reorder">
+            <div class="drag-dots"></div>
+            <div class="drag-dots"></div>
+            <div class="drag-dots"></div>
+          </div>
+          <div style="position: relative;">
+            <img src="${home.primaryImage}" alt="${home.headline}">
+            <div class="home-order-badge">${index + 1}</div>
+          </div>
           <div class="home-info">
             <h3>${home.headline}</h3>
             <p><strong>${home.street}</strong></p>
@@ -1122,6 +1194,97 @@
           </div>
         </div>
       `).join('');
+
+      // Add drag and drop event listeners
+      initDragAndDrop();
+    }
+
+    // Drag and Drop functionality
+    let draggedElement = null;
+    let draggedIndex = null;
+
+    function initDragAndDrop() {
+      const homeItems = document.querySelectorAll('.home-item');
+      
+      homeItems.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragenter', handleDragEnter);
+        item.addEventListener('dragleave', handleDragLeave);
+      });
+    }
+
+    function handleDragStart(e) {
+      draggedElement = this;
+      draggedIndex = parseInt(this.dataset.index);
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+      
+      // Remove all drag-over classes
+      document.querySelectorAll('.home-item').forEach(item => {
+        item.classList.remove('drag-over');
+      });
+    }
+
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      if (this !== draggedElement) {
+        this.classList.add('drag-over');
+      }
+    }
+
+    function handleDragLeave(e) {
+      this.classList.remove('drag-over');
+    }
+
+    async function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      
+      if (draggedElement !== this) {
+        const dropIndex = parseInt(this.dataset.index);
+        
+        // Reorder the homes array
+        const draggedHome = homes[draggedIndex];
+        homes.splice(draggedIndex, 1);
+        homes.splice(dropIndex, 0, draggedHome);
+        
+        // Save and re-render
+        try {
+          await saveHomes();
+          renderHomes();
+          
+          // Show success message
+          const message = document.createElement('div');
+          message.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; animation: slideIn 0.3s ease;';
+          message.textContent = '✓ Order updated! Slideshow updated too.';
+          document.body.appendChild(message);
+          
+          setTimeout(() => {
+            message.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => message.remove(), 300);
+          }, 2000);
+        } catch (error) {
+          alert('Error saving order: ' + error.message);
+        }
+      }
+      
+      return false;
     }
 
     function openAddModal() {
