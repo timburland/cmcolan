@@ -1319,4 +1319,14 @@
       )}`;
 
       document.getElementById('googleMapsBtn').href = googleMapsUrl;
-      document.getElementById('appleMapsBtn'
+      document.getElementById('appleMapsBtn').href = appleMapsUrl;
+    }
+
+    // Initialize map when page loads
+    window.addEventListener('load', () => {
+      initMap();
+      setTimeout(updateMapButtons, 2000); // Update after markers are loaded
+    });
+  </script>
+</body>
+</html>
