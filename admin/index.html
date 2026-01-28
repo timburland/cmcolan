@@ -473,6 +473,19 @@
       50% { transform: scale(1.1); }
     }
 
+    kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      font-family: monospace;
+      font-size: 0.85em;
+      color: #444;
+      background: #fafafa;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.2), 0 0 0 2px #fff inset;
+      white-space: nowrap;
+    }
+
     @media (max-width: 768px) {
       .home-item { grid-template-columns: 1fr; }
       .home-actions { flex-direction: row; }
@@ -506,6 +519,7 @@
 
     <div class="actions">
       <button onclick="openAddModal()">+ Add New Home</button>
+      <button onclick="openZillowModal()" style="background: #006aff; margin-left: 1rem;">📋 Import from Zillow</button>
     </div>
 
     <div id="homesList" class="homes-list"></div>
@@ -665,6 +679,85 @@
         
         <button type="submit" id="submitBtn">Save & Publish</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Zillow Import Modal -->
+  <div id="zillowModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>Import from Zillow</h2>
+        <button class="close-modal" onclick="closeZillowModal()">Close</button>
+      </div>
+      
+      <div style="padding: 2rem;">
+        <p style="margin-bottom: 1.5rem; color: var(--text-light); line-height: 1.6;">
+          Paste the URL from Zillow, Trulia, or Redfin and we'll automatically import all the property details and photos.
+        </p>
+        
+        <div class="form-group">
+          <label for="zillowUrl">Property Listing URL</label>
+          <input 
+            type="url" 
+            id="zillowUrl" 
+            placeholder="https://www.zillow.com/homedetails/..." 
+            required
+            style="font-size: 0.9rem; padding: 0.75rem;"
+          >
+          <small style="color: var(--text-light); margin-top: 0.5rem; display: block;">
+            Supports Zillow, Trulia, and Redfin URLs
+          </small>
+        </div>
+
+        <div id="importProgress" style="display: none; margin-top: 1.5rem;">
+          <div class="progress-container" style="margin-bottom: 1rem;">
+            <div id="importProgressBar" class="progress-bar" style="width: 0%;">
+              Importing...
+            </div>
+          </div>
+          <p id="importStatus" style="color: var(--text-light); font-size: 0.9rem; text-align: center;"></p>
+        </div>
+
+        <div id="importError" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8d7da; border-radius: 4px; color: #721c24; border-left: 4px solid #dc3545;"></div>
+
+        <div id="smartPasteSection" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">
+          <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--primary-dark);">
+            🎯 Alternative: Smart Paste
+          </h3>
+          <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.6;">
+            If automatic import fails, you can copy the listing page content and we'll extract the data:
+          </p>
+          <ol style="color: var(--text-light); font-size: 0.85rem; line-height: 1.8; margin-bottom: 1rem; padding-left: 1.5rem;">
+            <li>Go to the Zillow listing page</li>
+            <li>Press <kbd>Ctrl+A</kbd> (or <kbd>Cmd+A</kbd> on Mac) to select all</li>
+            <li>Press <kbd>Ctrl+C</kbd> (or <kbd>Cmd+C</kbd>) to copy</li>
+            <li>Paste below and click "Extract Data"</li>
+          </ol>
+          <div class="form-group">
+            <label>Paste Listing Content Here:</label>
+            <textarea 
+              id="smartPasteContent" 
+              rows="8" 
+              placeholder="Paste the copied content from Zillow here..."
+              style="font-family: monospace; font-size: 0.85rem;"
+            ></textarea>
+          </div>
+          <button 
+            onclick="extractFromPaste()" 
+            style="background: #28a745; width: 100%;"
+          >
+            Extract Data
+          </button>
+        </div>
+
+        <button 
+          id="importBtn" 
+          onclick="importFromZillow()" 
+          style="margin-top: 1.5rem; width: 100%; background: #006aff; font-size: 1rem; padding: 1rem;"
+        >
+          Import Property
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1265,10 +1358,288 @@
       return 'home_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
+    // Zillow Import Functions
+    function openZillowModal() {
+      document.getElementById('zillowModal').classList.add('active');
+      document.getElementById('zillowUrl').value = '';
+      document.getElementById('importProgress').style.display = 'none';
+      document.getElementById('importError').style.display = 'none';
+    }
+
+    function closeZillowModal() {
+      document.getElementById('zillowModal').classList.remove('active');
+    }
+
+    async function importFromZillow() {
+      const url = document.getElementById('zillowUrl').value.trim();
+      
+      if (!url) {
+        showImportError('Please enter a valid URL');
+        return;
+      }
+
+      const importBtn = document.getElementById('importBtn');
+      const progressDiv = document.getElementById('importProgress');
+      const progressBar = document.getElementById('importProgressBar');
+      const statusText = document.getElementById('importStatus');
+      const errorDiv = document.getElementById('importError');
+      const smartPasteSection = document.getElementById('smartPasteSection');
+
+      // Reset UI
+      errorDiv.style.display = 'none';
+      smartPasteSection.style.display = 'none';
+      progressDiv.style.display = 'block';
+      importBtn.disabled = true;
+      importBtn.textContent = 'Importing...';
+      
+      progressBar.style.width = '20%';
+      statusText.textContent = 'Fetching listing data...';
+
+      try {
+        // Step 1: Parse the listing
+        const response = await fetch('/api/parse-zillow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to parse listing');
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error('Failed to extract listing data');
+        }
+
+        const listingData = result.data;
+        
+        progressBar.style.width = '40%';
+        statusText.textContent = `Found: ${listingData.headline}`;
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Step 2: Download and upload images
+        progressBar.style.width = '60%';
+        statusText.textContent = `Uploading ${listingData.images.length} photos...`;
+
+        const uploadedImages = [];
+        let primaryImageUrl = '';
+
+        // Get address for folder organization
+        const address = {
+          street: listingData.street,
+          city: listingData.city,
+          state: listingData.state,
+          zip: listingData.zip
+        };
+
+        for (let i = 0; i < Math.min(listingData.images.length, 15); i++) {
+          try {
+            const imageUrl = listingData.images[i];
+            
+            // Fetch image as blob
+            const imageResponse = await fetch(imageUrl);
+            const imageBlob = await imageResponse.blob();
+            
+            // Convert to base64
+            const reader = new FileReader();
+            const imageData = await new Promise((resolve) => {
+              reader.onload = (e) => resolve(e.target.result);
+              reader.readAsDataURL(imageBlob);
+            });
+
+            // Upload to Azure
+            const uploadResponse = await fetch('/api/upload-image', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageData: imageData,
+                fileName: `imported_${Date.now()}_${i}.jpg`,
+                address: address
+              })
+            });
+
+            const uploadResult = await uploadResponse.json();
+            
+            if (uploadResult.success) {
+              if (i === 0) {
+                primaryImageUrl = uploadResult.url;
+              } else {
+                uploadedImages.push(uploadResult.url);
+              }
+            }
+            
+            // Update progress
+            const imageProgress = 60 + (i / listingData.images.length) * 30;
+            progressBar.style.width = imageProgress + '%';
+            statusText.textContent = `Uploaded ${i + 1}/${Math.min(listingData.images.length, 15)} photos...`;
+            
+          } catch (error) {
+            console.error(`Failed to upload image ${i}:`, error);
+          }
+        }
+
+        progressBar.style.width = '90%';
+        statusText.textContent = 'Pre-filling form...';
+
+        // Step 3: Close Zillow modal and open add modal with pre-filled data
+        closeZillowModal();
+        
+        // Open the add modal
+        openAddModal();
+        
+        // Pre-fill the form
+        document.getElementById('headline').value = listingData.headline || '';
+        document.getElementById('street').value = listingData.street || '';
+        document.getElementById('city').value = listingData.city || '';
+        document.getElementById('state').value = listingData.state || '';
+        document.getElementById('zip').value = listingData.zip || '';
+        document.getElementById('description').value = listingData.description || '';
+        document.getElementById('bedrooms').value = listingData.bedrooms || '';
+        document.getElementById('bathrooms').value = listingData.bathrooms || '';
+        document.getElementById('price').value = listingData.price || '';
+        
+        // Set images
+        primaryImageUrl = primaryImageUrl || listingData.images[0];
+        primaryImageFilename = 'imported-primary.jpg';
+        
+        galleryImagesData = uploadedImages.map((url, index) => ({
+          url: url,
+          filename: `imported-${index + 1}.jpg`
+        }));
+        
+        displayPrimaryPreview(primaryImageUrl, primaryImageFilename);
+        displayGalleryPreview();
+        
+        // Show completion indicators
+        if (primaryImageUrl) {
+          document.getElementById('primaryComplete').style.display = 'flex';
+        }
+        if (galleryImagesData.length > 0) {
+          document.getElementById('galleryComplete').innerHTML = `✓ ${galleryImagesData.length} photo${galleryImagesData.length > 1 ? 's' : ''} uploaded!`;
+          document.getElementById('galleryComplete').style.display = 'flex';
+        }
+        
+        showFormMessage('✓ Property imported successfully! Review and save.', 'success');
+
+      } catch (error) {
+        console.error('Import error:', error);
+        showImportError(error.message || 'Failed to import property. Zillow may be blocking automated requests.');
+        
+        // Show Smart Paste alternative
+        smartPasteSection.style.display = 'block';
+        
+      } finally {
+        importBtn.disabled = false;
+        importBtn.textContent = 'Import Property';
+        setTimeout(() => {
+          progressDiv.style.display = 'none';
+        }, 2000);
+      }
+    }
+
+    function extractFromPaste() {
+      const content = document.getElementById('smartPasteContent').value;
+      
+      if (!content) {
+        alert('Please paste the listing content first');
+        return;
+      }
+
+      try {
+        // Extract data using pattern matching
+        const data = {
+          street: '',
+          city: '',
+          state: '',
+          zip: '',
+          price: '',
+          bedrooms: 0,
+          bathrooms: 0,
+          description: ''
+        };
+
+        // Extract address (common patterns)
+        const addressMatch = content.match(/(\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Court|Ct|Circle|Cir|Boulevard|Blvd|Way))[,\s]+([A-Za-z\s]+)[,\s]+([A-Z]{2})\s+(\d{5})/i);
+        if (addressMatch) {
+          data.street = addressMatch[1].trim();
+          data.city = addressMatch[2].trim();
+          data.state = addressMatch[3].trim();
+          data.zip = addressMatch[4].trim();
+        }
+
+        // Extract price
+        const priceMatch = content.match(/\$[\d,]+/);
+        if (priceMatch) {
+          data.price = priceMatch[0];
+        }
+
+        // Extract beds
+        const bedsMatch = content.match(/(\d+)\s*(?:bed|bd|bedroom)/i);
+        if (bedsMatch) {
+          data.bedrooms = parseInt(bedsMatch[1]);
+        }
+
+        // Extract baths
+        const bathsMatch = content.match(/([\d.]+)\s*(?:bath|ba|bathroom)/i);
+        if (bathsMatch) {
+          data.bathrooms = parseFloat(bathsMatch[1]);
+        }
+
+        // Extract description (look for longer text blocks)
+        const sentences = content.match(/[A-Z][^.!?]*[.!?]/g) || [];
+        const longSentences = sentences.filter(s => s.length > 50);
+        if (longSentences.length > 0) {
+          data.description = longSentences.slice(0, 3).join(' ').substring(0, 500);
+        }
+
+        // Close Zillow modal and open add modal
+        closeZillowModal();
+        openAddModal();
+
+        // Pre-fill the form
+        if (data.street) document.getElementById('street').value = data.street;
+        if (data.city) document.getElementById('city').value = data.city;
+        if (data.state) document.getElementById('state').value = data.state;
+        if (data.zip) document.getElementById('zip').value = data.zip;
+        if (data.price) document.getElementById('price').value = data.price;
+        if (data.bedrooms) document.getElementById('bedrooms').value = data.bedrooms;
+        if (data.bathrooms) document.getElementById('bathrooms').value = data.bathrooms;
+        if (data.description) document.getElementById('description').value = data.description;
+
+        // Generate headline
+        const headline = `${data.street}, ${data.city}, ${data.state} ${data.zip}`.trim();
+        if (headline.length > 5) {
+          document.getElementById('headline').value = headline;
+        }
+
+        showFormMessage('✓ Data extracted! Please review and upload photos manually.', 'success');
+
+      } catch (error) {
+        alert('Could not extract data. Please fill in the form manually.');
+        closeZillowModal();
+        openAddModal();
+      }
+    }
+
+    function showImportError(message) {
+      const errorDiv = document.getElementById('importError');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
     // Close modal on outside click
     document.getElementById('homeModal').addEventListener('click', (e) => {
       if (e.target.id === 'homeModal') {
         closeModal();
+      }
+    });
+
+    document.getElementById('zillowModal').addEventListener('click', (e) => {
+      if (e.target.id === 'zillowModal') {
+        closeZillowModal();
       }
     });
   </script>
