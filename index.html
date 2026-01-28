@@ -745,6 +745,75 @@
         justify-content: center;
       }
     }
+
+    /* Extra small devices (iPhone SE, older phones) */
+    @media (max-width: 480px) {
+      .nav-container {
+        padding: 1rem;
+      }
+
+      .logo {
+        font-size: 1.3rem;
+      }
+
+      .logo-image {
+        height: 35px;
+      }
+
+      .hero-text-section h1 {
+        font-size: 1.75rem;
+      }
+
+      .hero-subtitle {
+        font-size: 0.8rem;
+      }
+
+      .hero-location {
+        font-size: 0.85rem;
+      }
+
+      .btn {
+        padding: 0.85rem 1.5rem;
+        font-size: 0.85rem;
+      }
+
+      .intro-section,
+      .testimonials-section,
+      .gallery-section,
+      .map-section {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+
+      .section-title {
+        font-size: 2.5rem;
+      }
+
+      .intro-content h2 {
+        font-size: 2rem;
+      }
+
+      .testimonial-card {
+        padding: 2rem;
+      }
+
+      .map-intro h2 {
+        font-size: 2rem;
+      }
+
+      .map-intro p {
+        font-size: 0.95rem;
+      }
+
+      #map {
+        height: 350px;
+      }
+
+      .map-btn {
+        font-size: 0.85rem;
+        padding: 0.85rem 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1231,15 +1300,14 @@
 
     async function geocodeAddress(address) {
       try {
-        // Use Nominatim geocoding service with Maryland constraint for better results
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=us&state=Maryland&limit=1`;
+        console.log(`Geocoding via server: ${address}`);
         
-        console.log(`Geocoding: ${address}`);
-        
-        const response = await fetch(url, {
+        const response = await fetch('/api/geocode-address', {
+          method: 'POST',
           headers: {
-            'User-Agent': 'CMConlanWebsite/1.0'
-          }
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ address })
         });
         
         if (!response.ok) {
@@ -1249,16 +1317,14 @@
         
         const data = await response.json();
         
-        if (data && data.length > 0) {
-          const lat = parseFloat(data[0].lat);
-          const lon = parseFloat(data[0].lon);
-          console.log(`✓ Geocoded: [${lat}, ${lon}] - ${data[0].display_name}`);
-          return [lat, lon];
+        if (data.success) {
+          console.log(`✓ Geocoded: [${data.lat}, ${data.lon}] - ${data.display_name}`);
+          return [data.lat, data.lon];
         } else {
           console.warn(`✗ No results found for: ${address}`);
+          return null;
         }
         
-        return null;
       } catch (error) {
         console.error(`✗ Geocoding error for ${address}:`, error);
         return null;
