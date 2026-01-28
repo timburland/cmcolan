@@ -726,7 +726,10 @@
         const response = await fetch('/api/get-homes');
         if (response.ok) {
           const data = await response.json();
-          soldHomes = (data.items || []).filter(h => h.status === 'Sold');
+          // Filter to only include sold homes that are marked for slideshow
+          soldHomes = (data.items || []).filter(h => 
+            h.status === 'Sold' && h.includeInSlideshow !== false
+          );
         }
       } catch (error) {
         console.error('Error loading homes for slideshow:', error);
