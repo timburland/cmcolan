@@ -980,7 +980,7 @@
           <p>Bethesda, Maryland</p>
           <p>Office: 301-983-1301</p>
           <p>Fax: 301-983-2544</p>
-          <p>Email: <a href="mailto:chris@cmconlan.com">chris@cmconlan.com</a></p>
+          <p>Email: <a href="/cdn-cgi/l/email-protection#7e1d160c170d3e1d131d1110121f10501d1113"><span class="__cf_email__" data-cfemail="f09398829983b0939d939f9e9c919ede939f9d">[email&#160;protected]</span></a></p>
         </div>
 
         <div>
@@ -1002,7 +1002,7 @@
     </div>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener("click", function (e) {
@@ -1259,6 +1259,18 @@
     }
 
     async function geocodeAddress(address) {
+      // Temporary hardcoded coordinates for known addresses
+      const knownAddresses = {
+        '9909 Logan Dr, Potomac, MD 20854': [39.0297, -77.1525]
+      };
+      
+      // Check if we have hardcoded coordinates
+      const normalized = address.trim();
+      if (knownAddresses[normalized]) {
+        console.log(`✓ Using known coordinates for: ${address}`);
+        return knownAddresses[normalized];
+      }
+      
       try {
         console.log(`Geocoding via server: ${address}`);
         
@@ -1307,14 +1319,4 @@
       )}`;
 
       document.getElementById('googleMapsBtn').href = googleMapsUrl;
-      document.getElementById('appleMapsBtn').href = appleMapsUrl;
-    }
-
-    // Initialize map when page loads
-    window.addEventListener('load', () => {
-      initMap();
-      setTimeout(updateMapButtons, 2000); // Update after markers are loaded
-    });
-  </script>
-</body>
-</html>
+      document.getElementById('appleMapsBtn'
