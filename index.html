@@ -1,1239 +1,1513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>C. M. Conlan Contractors & Builders | Custom Home Builder in Montgomery County, MD</title>
-  <meta name="description" content="Award-winning custom home builder and general contractor in Montgomery County, Maryland with over 35 years of experience in residential construction and renovations." />
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Leaflet CSS for Interactive Map -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal - C. M. Conlan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --primary-dark: #1a2332;
-      --primary-navy: #2c4056;
       --accent-gold: #c19a5b;
-      --accent-warm: #8b7355;
-      --text-dark: #2d2d2d;
       --text-light: #666666;
       --bg-cream: #f8f6f3;
-      --bg-white: #ffffff;
       --border-light: #e5e5e5;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: "Montserrat", sans-serif;
-      color: var(--text-dark);
-      line-height: 1.7;
-      overflow-x: hidden;
+      background: var(--bg-cream);
+      color: var(--primary-dark);
+      line-height: 1.6;
     }
 
-    h1, h2, h3, h4, h5, h6 {
-      font-family: "Cormorant Garamond", serif;
+    h1, h2, h3 { font-family: "Cormorant Garamond", serif; }
+
+    /* Login Screen */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .login-box {
+      background: white;
+      padding: 3rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .login-box h1 {
+      margin-bottom: 2rem;
+      color: var(--primary-dark);
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 0.5rem;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.875rem;
+      background: var(--accent-gold);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
       font-weight: 600;
-      line-height: 1.2;
-      color: var(--primary-dark);
-    }
-
-    /* Header Navigation */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg-white);
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-      z-index: 1000;
+      cursor: pointer;
       transition: all 0.3s ease;
-    }
-
-    .header.scrolled {
-      box-shadow: 0 2px 30px rgba(0, 0, 0, 0.12);
-    }
-
-    .nav-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.2rem 4rem;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      font-family: "Cormorant Garamond", serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--primary-dark);
-      text-decoration: none;
+      text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .logo-image {
-      height: 50px;
-      width: auto;
+    button:hover {
+      background: #a67f44;
+      transform: translateY(-2px);
     }
 
-    .nav-menu {
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    button.danger { background: #dc3545; }
+    button.danger:hover { background: #c82333; }
+
+    .error { color: #dc3545; margin-top: 0.5rem; }
+    .success { color: #28a745; margin-top: 0.5rem; padding: 1rem; background: #d4edda; border-radius: 4px; }
+
+    /* Admin Dashboard */
+    .admin-container { display: none; max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .admin-container.active { display: block; }
+
+    .admin-header {
       display: flex;
-      list-style: none;
-      gap: 2.5rem;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-light);
+    }
+
+    .logout-btn {
+      width: auto;
+      padding: 0.5rem 1.5rem;
+      background: transparent;
+      color: var(--primary-dark);
+      border: 2px solid var(--primary-dark);
+    }
+
+    .actions { display: flex; gap: 1rem; margin-bottom: 2rem; }
+    .actions button { width: auto; padding: 0.75rem 1.5rem; }
+
+    /* Homes List */
+    .homes-list { display: grid; gap: 1.5rem; }
+
+    .home-item {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      display: grid;
+      grid-template-columns: 200px 1fr auto;
+      gap: 1.5rem;
       align-items: center;
     }
 
-    .nav-menu a {
-      color: var(--text-dark);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      transition: color 0.3s ease;
-      position: relative;
-    }
-
-    .nav-menu a:hover {
-      color: var(--accent-gold);
-    }
-
-    .nav-menu a::after {
-      content: "";
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--accent-gold);
-      transition: width 0.3s ease;
-    }
-
-    .nav-menu a:hover::after {
-      width: 100%;
-    }
-
-    .dropdown {
-      position: relative;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: white;
-      min-width: 220px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      padding: 1rem 0;
-      margin-top: 1rem;
+    .home-item img {
+      width: 200px;
+      height: 150px;
+      object-fit: cover;
       border-radius: 4px;
     }
 
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
+    .home-info h3 { margin-bottom: 0.5rem; }
+    .home-info p { color: var(--text-light); font-size: 0.95rem; margin-bottom: 0.25rem; }
 
-    .dropdown-content a {
-      display: block;
-      padding: 0.8rem 1.5rem;
-      font-size: 0.9rem;
-    }
-
-    .dropdown-content a::after {
-      display: none;
-    }
-
-    .dropdown-content a:hover {
-      background: var(--bg-cream);
-    }
-
-    .mobile-menu-btn {
-      display: none;
-      background: none;
-      border: none;
-      font-size: 1.8rem;
-      cursor: pointer;
-      color: var(--primary-dark);
-    }
-
-    /* Hero Section - NEW DESIGN */
-    .hero {
-      margin-top: 80px;
-      background: var(--bg-white);
-    }
-
-    .hero-text-section {
-      background: var(--primary-dark);
-      color: white;
-      text-align: center;
-      padding: 3rem 2rem;
-    }
-
-    .hero-text-content {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .hero-text-section h1 {
-      font-size: 3.2rem;
-      color: white;
-      margin-bottom: 1rem;
-      font-weight: 400;
-      letter-spacing: 1px;
-    }
-
-    .hero-subtitle {
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-      font-weight: 300;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent-gold);
-    }
-
-    .hero-location {
-      font-size: 1rem;
-      margin-bottom: 1.8rem;
-      font-weight: 300;
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    /* Slideshow Section */
-    .slideshow-section {
-      position: relative;
-      height: 70vh;
-      min-height: 500px;
-      overflow: hidden;
-      background: #000;
-    }
-
-    .slideshow-container {
-      position: relative;
-      height: 100%;
-      width: 100%;
-    }
-
-    .hero-slide {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: opacity 1.2s ease-in-out;
-      background-size: cover;
-      background-position: center;
-      display: block;
-      cursor: pointer;
-    }
-
-    .hero-slide.active {
-      opacity: 1;
-    }
-
-    /* Navigation Controls */
-    .slide-nav {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.95);
-      border: none;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .slide-nav:hover {
-      background: var(--accent-gold);
-      transform: translateY(-50%) scale(1.1);
-    }
-
-    .slide-nav svg {
-      width: 24px;
-      height: 24px;
-      fill: var(--primary-dark);
-      transition: fill 0.3s ease;
-    }
-
-    .slide-nav:hover svg {
-      fill: white;
-    }
-
-    .slide-nav.prev {
-      left: 2rem;
-    }
-
-    .slide-nav.next {
-      right: 2rem;
-    }
-
-    /* Slide Indicators */
-    .slide-indicators {
-      position: absolute;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 0.8rem;
-      z-index: 10;
-    }
-
-    .indicator {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.5);
-      border: 2px solid white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .indicator.active {
-      background: white;
-      transform: scale(1.2);
-    }
-
-    .indicator:hover {
-      background: var(--accent-gold);
-      border-color: var(--accent-gold);
-    }
-
-    .btn {
+    .home-status {
       display: inline-block;
-      padding: 0.85rem 2rem;
-      background: var(--accent-gold);
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-      letter-spacing: 1px;
-      transition: all 0.3s ease;
-      border: 2px solid var(--accent-gold);
-      text-transform: uppercase;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
       font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
     }
 
-    .btn:hover {
-      background: transparent;
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(193, 154, 91, 0.3);
+    .home-status.for-sale { background: #d4edda; color: #155724; }
+    .home-status.sold { background: #f8d7da; color: #721c24; }
+    .home-status.poa { background: #d1ecf1; color: #0c5460; }
+
+    .home-actions { display: flex; gap: 0.5rem; flex-direction: column; }
+    .home-actions button { width: 100px; padding: 0.5rem; font-size: 0.9rem; }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      overflow-y: auto;
     }
 
-    .btn-outline {
-      background: transparent;
-      border: 2px solid white;
-    }
+    .modal.active { display: block; }
 
-    .btn-outline:hover {
+    .modal-content {
       background: white;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 8px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-light);
+    }
+
+    .close-modal {
+      width: auto;
+      padding: 0.5rem 1rem;
+      background: transparent;
       color: var(--primary-dark);
+      border: 1px solid var(--border-light);
     }
 
-    /* Introduction Section */
-    .intro-section {
-      padding: 8rem 4rem;
-      background: var(--bg-white);
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .two-column {
+    .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 5rem;
-      align-items: start;
+      gap: 1rem;
     }
 
-    .intro-image {
-      width: 100%;
-      height: 600px;
-      object-fit: cover;
-      box-shadow: 20px 20px 0 var(--accent-gold);
-    }
-
-    .intro-content h2 {
-      font-size: 3.5rem;
+    /* Image Upload */
+    .upload-section {
       margin-bottom: 2rem;
-      line-height: 1.1;
-      margin-top: 0;
-    }
-
-    .intro-content p {
-      font-size: 1.1rem;
-      color: var(--text-light);
-      margin-bottom: 1.5rem;
-      line-height: 1.8;
-    }
-
-    /* Testimonials Section */
-    .testimonials-section {
-      padding: 8rem 4rem;
+      padding: 1.5rem;
+      border: 2px dashed var(--border-light);
+      border-radius: 8px;
       background: var(--bg-cream);
     }
 
-    .section-title {
-      text-align: center;
-      font-size: 3.5rem;
-      margin-bottom: 4rem;
-    }
-
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .testimonial-card {
-      background: white;
-      padding: 3rem;
-      border-left: 4px solid var(--accent-gold);
-      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s ease;
-    }
-
-    .testimonial-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .testimonial-text {
-      font-size: 1.05rem;
-      line-height: 1.8;
-      color: var(--text-light);
-      margin-bottom: 2rem;
-      font-style: italic;
-    }
-
-    .testimonial-author {
-      font-weight: 600;
+    .upload-section h3 {
+      margin-bottom: 1rem;
       color: var(--primary-dark);
-      font-size: 1.1rem;
     }
 
-    /* Gallery Preview Section */
-    .gallery-section {
-      padding: 8rem 4rem;
-      background: var(--bg-white);
-    }
-
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-      max-width: 1400px;
-      margin: 3rem auto 0;
-    }
-
-    .gallery-item {
-      position: relative;
-      overflow: hidden;
-      height: 400px;
-      cursor: pointer;
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-
-    .gallery-item:hover img {
-      transform: scale(1.1);
-    }
-
-    /* Service Area Map Section */
-    .map-section {
-      padding: 4rem 4rem 8rem;
-      background: var(--bg-white);
-    }
-
-    .map-container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .map-intro {
+    .upload-box {
+      border: 2px dashed var(--accent-gold);
+      padding: 2rem;
       text-align: center;
-      margin-bottom: 3rem;
-    }
-
-    .map-intro h2 {
-      font-size: 3.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
       margin-bottom: 1rem;
     }
 
-    .map-intro p {
-      font-size: 1.2rem;
-      color: var(--text-light);
-      max-width: 800px;
-      margin: 0 auto;
+    .upload-box:hover {
+      background: var(--bg-cream);
+      border-color: #a67f44;
     }
 
-    #map {
-      height: 600px;
-      width: 100%;
-      border-radius: 8px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
+    .upload-box.uploading {
+      background: #fff3e0;
+      pointer-events: none;
     }
 
-    .leaflet-popup-content-wrapper {
-      border-radius: 8px;
-      padding: 0;
+    .upload-box input[type="file"] {
+      display: none;
     }
 
-    .leaflet-popup-content {
-      margin: 0;
-      min-width: 220px;
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
     }
 
-    .popup-content {
-      padding: 1rem;
-    }
-
-    .popup-content h3 {
-      margin: 0 0 0.5rem;
+    .upload-text {
       font-size: 1.1rem;
       color: var(--primary-dark);
+      margin-bottom: 0.5rem;
     }
 
-    .popup-content p {
-      margin: 0 0 0.75rem;
+    .upload-subtext {
       font-size: 0.9rem;
       color: var(--text-light);
     }
 
-    .popup-link {
-      display: inline-block;
-      padding: 0.5rem 1rem;
+    .image-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .preview-item {
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+
+    .remove-image {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      background: rgba(220, 53, 69, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      border: none;
+    }
+
+    .uploading-indicator {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .uploading-indicator.active {
+      display: block;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 30px;
+      background: #e5e5e5;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-gold), #d4a76a);
+      width: 0%;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .upload-complete {
+      color: #28a745;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Publishing Progress */
+    .publishing-progress {
+      display: none;
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: var(--bg-cream);
+      border-radius: 8px;
+      border: 2px solid var(--accent-gold);
+    }
+
+    .publishing-progress.active {
+      display: block;
+    }
+
+    .publishing-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .publishing-step {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem;
+      background: white;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .publishing-step.active {
+      background: #fff3e0;
+      border-left: 4px solid var(--accent-gold);
+    }
+
+    .publishing-step.complete {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+    }
+
+    .step-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      background: #e5e5e5;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .publishing-step.active .step-icon {
       background: var(--accent-gold);
       color: white;
-      text-decoration: none;
-      font-size: 0.85rem;
-      border-radius: 4px;
-      transition: background 0.3s ease;
+      animation: pulse 1.5s ease-in-out infinite;
     }
 
-    .popup-link:hover {
-      background: var(--primary-dark);
-    }
-
-    /* Footer */
-    .footer {
-      background: var(--primary-dark);
+    .publishing-step.complete .step-icon {
+      background: #28a745;
       color: white;
-      padding: 4rem 4rem 2rem;
     }
 
-    .footer-content {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4rem;
-      max-width: 1400px;
-      margin: 0 auto 3rem;
+    .step-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: var(--text-dark);
     }
 
-    .footer h3 {
-      color: var(--accent-gold);
-      margin-bottom: 1.5rem;
+    .publishing-step.active .step-text {
+      font-weight: 600;
+    }
+
+    .final-success {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #d4edda;
+      border-radius: 4px;
+      border-left: 4px solid #28a745;
+      color: #155724;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .final-success.active {
+      display: flex;
+    }
+
+    .success-icon {
       font-size: 1.5rem;
     }
 
-    .footer p, .footer a {
-      color: rgba(255, 255, 255, 0.8);
-      text-decoration: none;
-      line-height: 2;
-    }
-
-    .footer a:hover {
-      color: var(--accent-gold);
-    }
-
-    .social-icons {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .social-icons a {
-      width: 40px;
-      height: 40px;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-    }
-
-    .social-icons a:hover {
-      background: var(--accent-gold);
-      transform: translateY(-3px);
-    }
-
-    .footer-bottom {
-      text-align: center;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1024px) {
-      .nav-container { padding: 1rem 2rem; }
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-      .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
-      .slide-nav { width: 50px; height: 50px; }
-      .slide-nav.prev { left: 1rem; }
-      .slide-nav.next { right: 1rem; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
     }
 
     @media (max-width: 768px) {
-      .mobile-menu-btn { display: block; }
-
-      .nav-menu {
-        position: fixed;
-        top: 80px;
-        left: -100%;
-        width: 100%;
-        height: calc(100vh - 80px);
-        background: white;
-        flex-direction: column;
-        padding: 2rem;
-        transition: left 0.3s ease;
-        align-items: flex-start;
-      }
-
-      .nav-menu.active { left: 0; }
-
-      .hero-text-section h1 { font-size: 2rem; }
-      .hero-subtitle { font-size: 0.9rem; }
-      .hero-location { font-size: 0.9rem; }
-      .hero-buttons { flex-direction: column; }
-      .hero-text-section { padding: 2rem 1.5rem; }
-
-      .slideshow-section { height: 50vh; min-height: 400px; }
-
-      .slide-nav { width: 45px; height: 45px; }
-      .slide-nav.prev { left: 0.5rem; }
-      .slide-nav.next { right: 0.5rem; }
-      .slide-nav svg { width: 20px; height: 20px; }
-
-      .two-column {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-      }
-
-      .intro-image { height: 400px; }
-      .intro-content h2 { font-size: 2.5rem; }
-
-      .testimonials-grid { grid-template-columns: 1fr; }
-      .gallery-grid { grid-template-columns: 1fr; }
-
-      .footer-content {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      .btn-outline {
-        margin-left: 0;
-        margin-top: 0;
-      }
-
-      /* Map section mobile styles */
-      .map-section {
-        padding: 3rem 2rem 4rem;
-      }
-
-      .map-intro h2 {
-        font-size: 2.5rem;
-      }
-
-      .map-intro p {
-        font-size: 1rem;
-      }
-
-      #map {
-        height: 400px;
-      }
-    }
-
-    /* Extra small devices (iPhone SE, older phones) */
-    @media (max-width: 480px) {
-      .nav-container {
-        padding: 1rem;
-      }
-
-      .logo {
-        font-size: 1.3rem;
-      }
-
-      .logo-image {
-        height: 35px;
-      }
-
-      .hero-text-section h1 {
-        font-size: 1.75rem;
-      }
-
-      .hero-subtitle {
-        font-size: 0.8rem;
-      }
-
-      .hero-location {
-        font-size: 0.85rem;
-      }
-
-      .btn {
-        padding: 0.85rem 1.5rem;
-        font-size: 0.85rem;
-      }
-
-      .intro-section,
-      .testimonials-section,
-      .gallery-section,
-      .map-section {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-      }
-
-      .section-title {
-        font-size: 2.5rem;
-      }
-
-      .intro-content h2 {
-        font-size: 2rem;
-      }
-
-      .testimonial-card {
-        padding: 2rem;
-      }
-
-      .map-intro h2 {
-        font-size: 2rem;
-      }
-
-      .map-intro p {
-        font-size: 0.95rem;
-      }
-
-      #map {
-        height: 350px;
-      }
+      .home-item { grid-template-columns: 1fr; }
+      .home-actions { flex-direction: row; }
+      .form-row { grid-template-columns: 1fr; }
+      .modal-content { margin: 1rem; padding: 1.5rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Header Navigation -->
-  <header class="header">
-    <div class="nav-container">
-      <a href="#" class="logo">
-        <img src="conlanlogo.png" alt="C. M. Conlan Logo" class="logo-image" />
-        <span>C. M. Conlan Contractors &amp; Builders</span>
-      </a>
-      <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
-      <nav>
-        <ul class="nav-menu" id="navMenu">
-          <li><a href="#home">Home</a></li>
-          <li><a href="#gallery">Photo Gallery</a></li>
-          <li><a href="our-homes.html">Our Homes</a></li>
-          <li><a href="coming-soon.html">Coming Soon</a></li>
-          <li class="dropdown">
-            <a href="#about">About</a>
-            <div class="dropdown-content">
-              <a href="#awards">Awards</a>
-              <a href="#certifications">Licenses &amp; Certifications</a>
-              <a href="#testimonials">Our Clients</a>
-            </div>
-          </li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <section class="hero" id="home">
-    <!-- Text Section Above Slideshow -->
-    <div class="hero-text-section">
-      <div class="hero-text-content">
-        <h1>Building and Renovating Fine Homes</h1>
-        <p class="hero-subtitle">Expert Craftsmanship, Built to Last</p>
-        <p class="hero-location">In Montgomery County, MD and the Greater Washington, D.C. Area</p>
-        <div class="hero-buttons">
-          <a href="#about" class="btn">About Us</a>
-          <a href="#gallery" class="btn btn-outline">View Our Work</a>
+  <!-- Login Screen -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-box">
+      <h1>Admin Login</h1>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required>
         </div>
-      </div>
+        <button type="submit">Login</button>
+        <div id="loginError" class="error" style="display: none;">Incorrect password</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="adminContainer" class="admin-container">
+    <div class="admin-header">
+      <h1>Manage Available Homes</h1>
+      <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <!-- Slideshow Section -->
-    <div class="slideshow-section">
-      <div class="slideshow-container" id="slideshowContainer">
-        <!-- Slides will be loaded dynamically from sold homes -->
-      </div>
-
-      <!-- Navigation Buttons -->
-      <button class="slide-nav prev" onclick="changeSlide(-1)" aria-label="Previous slide">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-        </svg>
-      </button>
-      <button class="slide-nav next" onclick="changeSlide(1)" aria-label="Next slide">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-        </svg>
-      </button>
-
-      <!-- Slide Indicators -->
-      <div class="slide-indicators" id="slideIndicators">
-        <!-- Indicators will be generated dynamically -->
-      </div>
+    <div class="actions">
+      <button onclick="openAddModal()">+ Add New Home</button>
+      <button onclick="openZillowModal()" style="background: #006aff; margin-left: 1rem;">📋 Import from Zillow</button>
     </div>
-  </section>
 
-  <!-- Introduction Section -->
-  <section class="intro-section" id="about">
-    <div class="container">
-      <div class="two-column">
-        <img src="chrisconlanheadshot.png" alt="Chris Conlan - Award-Winning Custom Home Builder" class="intro-image" />
-        <div class="intro-content">
-          <h2>Meet Chris Conlan</h2>
-          <p><strong>C. M. Conlan Contractors and Builders</strong> is a Bethesda-based firm well-known for its expertise in custom home construction and renovations throughout Montgomery County, Maryland—including Chevy Chase, Potomac, Rockville, and surrounding areas.</p>
-          <p>Founded in 1989 by Chris Conlan, our company has developed a reputation for expert craftsmanship, close attention to detail, and exceptional strength in design. With over 35 years of experience as a residential home builder and a background in real estate, Chris is an award-winning builder recognized by the Montgomery County Builder's Association and has been featured in Bethesda Magazine as one of the area's top builders.</p>
-          <p>We specialize in creating custom homes tailored to each family's specific needs—whether on a lot we help you find, a lot you currently own, or one of our available lots. We also offer expert renovations and additions for homeowners looking to upgrade. At C. M. Conlan, we believe in developing strong relationships between builder and client. You can depend on Chris to work closely with you throughout the entire process, remaining active and accessible from start to finish.</p>
-          <p>Our company is also a proud supporter of <strong>Rebuilding Together Montgomery County</strong>, a local nonprofit that provides renovations and housing support for underprivileged families. Chris has served as an active board member, led multiple home renovation projects, and participated in the RTMC Playhouse Project—giving the gift of home to those in need.</p>
-          <a href="#portfolio" class="btn" style="margin-top: 1rem;">Browse Our Projects</a>
-        </div>
-      </div>
-    </div>
-  </section>
+    <div id="homesList" class="homes-list"></div>
+  </div>
 
-  <!-- Gallery Preview Section -->
-  <section class="gallery-section" id="gallery">
-    <div class="container">
-      <h2 class="section-title">Our Recent Work</h2>
-      <div class="gallery-grid">
-        <div class="gallery-item">
-          <img src="home_1.jpg" alt="Modern Custom Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_2.jpg" alt="Elegant Custom Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_3.jpg" alt="Coastal Style Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_4.jpg" alt="Craftsman Style Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_5.jpg" alt="Traditional Custom Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_7.jpg" alt="Luxury Custom Home" />
-        </div>
+  <!-- Add/Edit Home Modal -->
+  <div id="homeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Home</h2>
+        <button class="close-modal" onclick="closeModal()">Close</button>
       </div>
 
-      <div style="text-align: center; margin-top: 3rem;">
-        <a href="#portfolio" class="btn">View Full Gallery</a>
-      </div>
-    </div>
-  </section>
+      <form id="homeForm">
+        <input type="hidden" id="homeId">
+        <input type="hidden" id="primaryImageUrl">
 
-  <!-- Service Area Map Section -->
-  <section class="map-section" id="service-area">
-    <div class="map-container">
-      <div class="map-intro">
-        <h2 class="section-title">Our Footprint</h2>
-        <p>Explore our footprint across Montgomery County, Maryland. Each pin represents a custom home we've built with pride.</p>
-      </div>
-
-      <div id="map"></div>
-    </div>
-  </section>
-
-  <!-- Testimonials Section -->
-  <section class="testimonials-section" id="testimonials">
-    <div class="container">
-      <h2 class="section-title">What Our Clients Say</h2>
-      <div class="testimonials-grid">
-        <div class="testimonial-card">
-          <p class="testimonial-text">"As a home builder myself, I appreciated the high quality and terrific service we received when Chris and his team built our custom home. They made it easy for us, from helping to design what we wanted to the final turnover. Everyone had a positive can-do attitude and was good to work with."</p>
-          <p class="testimonial-author">— Terry Eakin</p>
-        </div>
-        <div class="testimonial-card">
-          <p class="testimonial-text">"Chris's personal attention, focus on detail, customer orientation, high quality standards, and creativity in solving tough issues are unmatched. I can't imagine building a house with anyone else. Highly recommended!"</p>
-          <p class="testimonial-author">— Harris Family</p>
-        </div>
-        <div class="testimonial-card">
-          <p class="testimonial-text">"We bought our beautiful new home from C. M. Conlan and it still wows us years later. Every system has worked perfectly, and I am not easy to please. The craftsmanship is honestly perfection."</p>
-          <p class="testimonial-author">— The Jacobs</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer" id="contact">
-    <div class="container">
-      <div class="footer-content">
-        <div>
-          <h3>C. M. Conlan Contractors &amp; Builders</h3>
-          <p>Building exceptional homes and lasting relationships in Montgomery County since 1989</p>
-          <p style="margin-top: 2rem;">© 2026 C. M. Conlan Contractors &amp; Builders<br />All Rights Reserved</p>
-        </div>
-
-        <div>
-          <h3>Contact Us</h3>
-          <p>Bethesda, Maryland</p>
-          <p>Office: 301-983-1301</p>
-          <p>Fax: 301-983-2544</p>
-          <p>Email: <a href="/cdn-cgi/l/email-protection#7e1d160c170d3e1d131d1110121f10501d1113"><span class="__cf_email__" data-cfemail="f09398829983b0939d939f9e9c919ede939f9d">[email&#160;protected]</span></a></p>
-        </div>
-
-        <div>
-          <h3>Connect With Us</h3>
-          <div class="social-icons">
-            <a href="#" aria-label="Facebook">f</a>
-            <a href="#" aria-label="Instagram">📷</a>
-            <a href="#" aria-label="LinkedIn">in</a>
-            <a href="#" aria-label="Houzz">H</a>
+        <!-- Image Upload Section -->
+        <div class="upload-section">
+          <h3>📸 Property Photos</h3>
+          
+          <div class="upload-box" id="primaryUpload" onclick="document.getElementById('primaryImageInput').click()">
+            <input type="file" id="primaryImageInput" accept="image/*" onchange="handlePrimaryImage(event)">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Upload Main Property Photo</div>
+            <div class="upload-subtext">Click to select from your computer</div>
           </div>
-          <p style="margin-top: 2rem;"><a href="#awards">Awards &amp; Certifications</a></p>
-          <p><a href="#testimonials">Client Testimonials</a></p>
-        </div>
-      </div>
+          <div class="uploading-indicator" id="primaryUploading">
+            <div class="progress-bar-container">
+              <div class="progress-bar" id="primaryProgress">0%</div>
+            </div>
+          </div>
+          <div class="upload-complete" id="primaryComplete" style="display: none;">
+            ✓ Uploaded successfully!
+          </div>
+          <div id="primaryPreview" class="image-preview-grid"></div>
 
-      <div class="footer-bottom">
-        <p>Proudly serving all of Montgomery County, Maryland</p>
+          <div class="upload-box" id="galleryUpload" onclick="document.getElementById('galleryImageInput').click()" style="margin-top: 1rem;">
+            <input type="file" id="galleryImageInput" accept="image/*" multiple onchange="handleGalleryImages(event)">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text">Upload Additional Photos (Optional)</div>
+            <div class="upload-subtext">You can select multiple images</div>
+          </div>
+          <div class="uploading-indicator" id="galleryUploading">
+            <div class="progress-bar-container">
+              <div class="progress-bar" id="galleryProgress">0%</div>
+            </div>
+          </div>
+          <div class="upload-complete" id="galleryComplete" style="display: none;">
+            ✓ All photos uploaded successfully!
+          </div>
+          <div id="galleryPreview" class="image-preview-grid"></div>
+        </div>
+
+        <!-- Property Details -->
+        <div class="form-group">
+          <label for="headline">Property Headline</label>
+          <input type="text" id="headline" placeholder="e.g., Stunning Modern Home in Bethesda">
+          <small>Optional - Leave blank to use the full address as the headline</small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="street">Street Address *</label>
+            <input type="text" id="street" required placeholder="e.g., 6416 Wiscasset Road">
+          </div>
+          <div class="form-group">
+            <label for="city">City *</label>
+            <input type="text" id="city" required placeholder="e.g., Bethesda">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="state">State *</label>
+            <input type="text" id="state" required placeholder="e.g., MD" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label for="zip">ZIP Code</label>
+            <input type="text" id="zip" placeholder="e.g., 20816">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Property Description</label>
+          <textarea id="description" placeholder="Describe the property in a few sentences..."></textarea>
+          <small>Optional - Highlight the best features</small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bedrooms">Bedrooms *</label>
+            <input type="number" id="bedrooms" min="1" required>
+          </div>
+          <div class="form-group">
+            <label for="bathrooms">Bathrooms *</label>
+            <input type="number" id="bathrooms" min="1" step="0.5" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="parking">Parking Spaces</label>
+            <input type="number" id="parking" min="0" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label for="garage">Garage Spaces</label>
+            <input type="number" id="garage" min="0" placeholder="0">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="status">Status *</label>
+            <select id="status" required>
+              <option value="For Sale">For Sale</option>
+              <option value="POA">POA (Price on Application)</option>
+              <option value="Sold">Sold</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="price">Price (optional)</label>
+            <input type="text" id="price" placeholder="2500000" oninput="formatPrice(this)">
+            <small>Leave blank if status is POA - numbers only, we'll add $ and commas</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="features">Property Features</label>
+          <textarea id="features" rows="5" placeholder="New Construction&#10;Hardwood Floors&#10;Gourmet Kitchen&#10;Master Suite&#10;Smart Home Technology"></textarea>
+          <small>Enter one feature per line</small>
+        </div>
+
+        <div id="formMessage" style="margin-bottom: 1rem;"></div>
+
+        <!-- Publishing Progress Indicator -->
+        <div id="publishingProgress" class="publishing-progress">
+          <div class="publishing-steps">
+            <div class="publishing-step" id="step1">
+              <div class="step-icon">1</div>
+              <div class="step-text">Preparing property data...</div>
+            </div>
+            <div class="publishing-step" id="step2">
+              <div class="step-icon">2</div>
+              <div class="step-text">Uploading to server...</div>
+            </div>
+            <div class="publishing-step" id="step3">
+              <div class="step-icon">3</div>
+              <div class="step-text">Publishing to website...</div>
+            </div>
+          </div>
+          <div class="final-success" id="finalSuccess">
+            <span class="success-icon">🎉</span>
+            <span>Your listing is now LIVE on the website!</span>
+          </div>
+        </div>
+        
+        <button type="submit" id="submitBtn">Save & Publish</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Zillow Import Modal -->
+  <div id="zillowModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>Import from Zillow</h2>
+        <button class="close-modal" onclick="closeZillowModal()">Close</button>
+      </div>
+      
+      <div style="padding: 2rem;">
+        <p style="margin-bottom: 1.5rem; color: var(--text-light); line-height: 1.6;">
+          Paste the URL from Zillow, Trulia, or Redfin and we'll automatically import all the property details and photos.
+        </p>
+        
+        <div class="form-group">
+          <label for="zillowUrl">Property Listing URL</label>
+          <input 
+            type="url" 
+            id="zillowUrl" 
+            placeholder="https://www.zillow.com/homedetails/..." 
+            required
+            style="font-size: 0.9rem; padding: 0.75rem;"
+          >
+          <small style="color: var(--text-light); margin-top: 0.5rem; display: block;">
+            Supports Zillow, Trulia, and Redfin URLs
+          </small>
+        </div>
+
+        <div id="importProgress" style="display: none; margin-top: 1.5rem;">
+          <div class="progress-container" style="margin-bottom: 1rem;">
+            <div id="importProgressBar" class="progress-bar" style="width: 0%;">
+              Importing...
+            </div>
+          </div>
+          <p id="importStatus" style="color: var(--text-light); font-size: 0.9rem; text-align: center;"></p>
+        </div>
+
+        <div id="importError" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8d7da; border-radius: 4px; color: #721c24; border-left: 4px solid #dc3545;"></div>
+
+        <button 
+          id="importBtn" 
+          onclick="importFromZillow()" 
+          style="margin-top: 1.5rem; width: 100%; background: #006aff; font-size: 1rem; padding: 1rem;"
+        >
+          Import Property
+        </button>
       </div>
     </div>
-  </footer>
+  </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-    // Smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener("click", function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute("href"));
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
-    });
-
-    // Header scroll effect
-    window.addEventListener("scroll", () => {
-      const header = document.querySelector(".header");
-      if (window.scrollY > 50) header.classList.add("scrolled");
-      else header.classList.remove("scrolled");
-    });
-
-    // Mobile menu toggle
-    function toggleMenu() {
-      const navMenu = document.getElementById("navMenu");
-      navMenu.classList.toggle("active");
-    }
-
-    // Slideshow functionality - Dynamic loading from sold homes
-    let currentSlide = 0;
-    let autoSlideInterval;
-    let slides = [];
-    let indicators = [];
-    let totalSlides = 0;
-    let soldHomes = [];
-
-    // Load sold homes and initialize slideshow
-    async function loadSlideshowHomes() {
-      try {
-        const response = await fetch('/api/get-homes');
-        if (response.ok) {
-          const data = await response.json();
-          soldHomes = (data.items || []).filter(h => h.status === 'Sold');
-        }
-      } catch (error) {
-        console.error('Error loading homes for slideshow:', error);
-      }
-
-      // Fallback to static images if no sold homes
-      if (soldHomes.length === 0) {
-        soldHomes = [
-          { id: 'static1', primaryImage: 'home_1.jpg', headline: 'Custom Home' },
-          { id: 'static2', primaryImage: 'home_2.jpg', headline: 'Custom Home' },
-          { id: 'static3', primaryImage: 'home_3.jpg', headline: 'Custom Home' },
-          { id: 'static4', primaryImage: 'home_4.jpg', headline: 'Custom Home' },
-          { id: 'static5', primaryImage: 'home_5.jpg', headline: 'Custom Home' },
-          { id: 'static6', primaryImage: 'home_6.jpg', headline: 'Custom Home' }
-        ];
-      }
-
-      // Create slides HTML
-      const slideshowContainer = document.getElementById('slideshowContainer');
-      const slideIndicators = document.getElementById('slideIndicators');
-
-      slideshowContainer.innerHTML = soldHomes.map((home, index) => `
-        <a href="${home.id.startsWith('static') ? '#gallery' : 'home-details.html?id=' + home.id}" 
-           class="hero-slide ${index === 0 ? 'active' : ''}" 
-           style="background-image: url('${home.primaryImage}')"
-           aria-label="View ${home.headline}">
-        </a>
-      `).join('');
-
-      slideIndicators.innerHTML = soldHomes.map((_, index) => `
-        <span class="indicator ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></span>
-      `).join('');
-
-      // Update references
-      slides = document.querySelectorAll('.hero-slide');
-      indicators = document.querySelectorAll('.indicator');
-      totalSlides = slides.length;
-
-      // Initialize slideshow
-      if (totalSlides > 0) {
-        showSlide(0);
-        startAutoSlide();
-      }
-    }
-
-    function showSlide(index) {
-      if (totalSlides === 0) return;
-      
-      // Wrap around
-      if (index >= totalSlides) currentSlide = 0;
-      else if (index < 0) currentSlide = totalSlides - 1;
-      else currentSlide = index;
-
-      // Update slides
-      slides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === currentSlide);
-      });
-
-      // Update indicators
-      indicators.forEach((indicator, i) => {
-        indicator.classList.toggle('active', i === currentSlide);
-      });
-    }
-
-    function changeSlide(direction) {
-      showSlide(currentSlide + direction);
-      resetAutoSlide();
-    }
-
-    function goToSlide(index) {
-      showSlide(index);
-      resetAutoSlide();
-    }
-
-    function resetAutoSlide() {
-      clearInterval(autoSlideInterval);
-      startAutoSlide();
-    }
-
-    function startAutoSlide() {
-      autoSlideInterval = setInterval(() => {
-        showSlide(currentSlide + 1);
-      }, 6000); // Auto-advance every 6 seconds
-    }
-
-    // Load slideshow on page load
-    loadSlideshowHomes();
-
-    // Pause auto-slide on hover
-    const slideshowSection = document.querySelector('.slideshow-section');
-    if (slideshowSection) {
-      slideshowSection.addEventListener('mouseenter', () => {
-        clearInterval(autoSlideInterval);
-      });
-      slideshowSection.addEventListener('mouseleave', () => {
-        startAutoSlide();
-      });
-    }
-  </script>
-
-  <!-- Leaflet JavaScript Library -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-  <!-- Map Initialization Script -->
   <script>
-    // Initialize the map
-    let map;
-    let markers = [];
-    let homesData = [];
+    const ADMIN_PASSWORD = 'conlan2026';
+    const STORAGE_KEY = 'cmconlan_homes';
+    const AUTH_KEY = 'cmconlan_auth';
 
-    async function initMap() {
-      // Create map centered on Bethesda, MD
-      map = L.map('map').setView([38.9807, -77.0947], 12);
+    let primaryImageUrl = '';
+    let primaryImageFilename = '';
+    let galleryImagesData = []; // Array of {url, filename}
+    let editingId = null;
+    let homes = [];
 
-      // Add OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19
-      }).addTo(map);
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      loadHomes();
+    });
 
-      // Load sold homes and add markers
-      await loadHomesForMap();
-    }
+    // Authentication
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      
+      if (password === ADMIN_PASSWORD) {
+        localStorage.setItem(AUTH_KEY, 'true');
+        showAdmin();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    });
 
-    async function loadHomesForMap() {
-      try {
-        const response = await fetch('/api/get-homes');
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Raw homes data:', data);
-          
-          // Try to get sold homes first, then all homes if none are sold
-          homesData = (data.items || []).filter(h => h.status === 'Sold');
-          
-          if (homesData.length === 0) {
-            console.warn('No sold homes found, showing all homes on map');
-            homesData = data.items || [];
-          }
-          
-          console.log(`Found ${homesData.length} homes for map:`, homesData);
-          
-          if (homesData.length === 0) {
-            console.error('No homes data available for map');
-            return;
-          }
-          
-          // Add markers for each home with delay to avoid rate limiting
-          for (let i = 0; i < homesData.length; i++) {
-            const home = homesData[i];
-            console.log(`Geocoding ${i + 1}/${homesData.length}: ${home.street}, ${home.city}, ${home.state} ${home.zip}`);
-            await addMarker(home);
-            
-            // Wait 1 second between requests to respect Nominatim rate limits
-            if (i < homesData.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-          }
-
-          // Fit map to show all markers if any exist
-          if (markers.length > 0) {
-            console.log(`✓ Successfully placed ${markers.length} markers on map`);
-            const group = new L.featureGroup(markers);
-            map.fitBounds(group.getBounds().pad(0.1));
-          } else {
-            console.error('✗ No markers were placed on the map. Check geocoding errors above.');
-          }
-        } else {
-          console.error('Failed to fetch homes:', response.status);
-        }
-      } catch (error) {
-        console.error('Error loading homes for map:', error);
+    function checkAuth() {
+      if (localStorage.getItem(AUTH_KEY) === 'true') {
+        showAdmin();
       }
     }
 
-    async function addMarker(home) {
-      // Create full address string
-      const address = `${home.street}, ${home.city}, ${home.state} ${home.zip || ''}`.trim();
+    function showAdmin() {
+      document.getElementById('loginContainer').style.display = 'none';
+      document.getElementById('adminContainer').classList.add('active');
+    }
+
+    function logout() {
+      localStorage.removeItem(AUTH_KEY);
+      location.reload();
+    }
+
+    // Image Upload - Uploads to Blob Storage and gets URL
+    async function handlePrimaryImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      document.getElementById('primaryUploading').classList.add('active');
+      document.getElementById('primaryComplete').style.display = 'none';
+      document.getElementById('primaryUpload').classList.add('uploading');
       
-      try {
-        let coords = null;
-        
-        // First, check if coordinates are stored in the home data
-        if (home.latitude && home.longitude) {
-          coords = [home.latitude, home.longitude];
-          console.log(`✓ Using stored coordinates for: ${home.headline}`);
-        } else {
-          // If not stored, try geocoding
-          coords = await geocodeAddress(address);
+      const progressBar = document.getElementById('primaryProgress');
+      progressBar.style.width = '0%';
+      progressBar.textContent = '0%';
+      
+      // Smooth progress animation
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        if (progress < 70) {
+          progress += 10;
+          progressBar.style.width = progress + '%';
+          progressBar.textContent = progress + '%';
         }
-        
-        if (coords) {
-          // Create custom icon (red pin)
-          const customIcon = L.divIcon({
-            className: 'custom-marker',
-            html: `<div style="background: #e74c3c; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.3);"></div>`,
-            iconSize: [30, 30],
-            iconAnchor: [15, 30],
-            popupAnchor: [0, -30]
+      }, 200);
+
+      try {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const imageData = e.target.result;
+          
+          // Set to 75% when starting upload
+          clearInterval(progressInterval);
+          progressBar.style.width = '75%';
+          progressBar.textContent = '75%';
+          
+          // Get address for folder organization
+          const address = {
+            street: document.getElementById('street').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            state: document.getElementById('state').value.trim(),
+            zip: document.getElementById('zip').value.trim()
+          };
+
+          // Upload to Azure Blob Storage
+          const response = await fetch('/api/upload-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageData: imageData,
+              fileName: file.name,
+              address: address
+            })
           });
 
-          // Create marker
-          const marker = L.marker(coords, { icon: customIcon }).addTo(map);
+          const result = await response.json();
           
-          // Create popup content
-          const popupContent = `
-            <div class="popup-content">
-              <h3>${home.headline}</h3>
-              <p>${address}</p>
-              <a href="home-details.html?id=${home.id}" class="popup-link">View Details</a>
-            </div>
-          `;
+          // Complete to 100%
+          progressBar.style.width = '100%';
+          progressBar.textContent = '100%';
           
-          marker.bindPopup(popupContent);
-          markers.push(marker);
-          
-          console.log(`✓ Marker placed for: ${home.headline}`);
-        } else {
-          console.warn(`✗ Could not place marker for: ${home.headline} - geocoding failed`);
-        }
+          if (result.success) {
+            primaryImageUrl = result.url;
+            primaryImageFilename = file.name;
+            displayPrimaryPreview(result.url, file.name);
+            
+            setTimeout(() => {
+              document.getElementById('primaryUploading').classList.remove('active');
+              document.getElementById('primaryComplete').style.display = 'flex';
+            }, 500);
+          } else {
+            alert('Failed to upload image: ' + result.error);
+            document.getElementById('primaryUploading').classList.remove('active');
+          }
+
+          document.getElementById('primaryUpload').classList.remove('uploading');
+        };
+        reader.readAsDataURL(file);
       } catch (error) {
-        console.error(`Error geocoding ${address}:`, error);
+        clearInterval(progressInterval);
+        alert('Error uploading image: ' + error.message);
+        document.getElementById('primaryUploading').classList.remove('active');
+        document.getElementById('primaryUpload').classList.remove('uploading');
       }
     }
 
-    async function geocodeAddress(address) {
-      // Try API geocoding
-      try {
-        console.log(`Geocoding via API: ${address}`);
-        
-        const response = await fetch('/api/geocode-address', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ address })
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          if (data.success) {
-            console.log(`✓ Geocoded via API: [${data.lat}, ${data.lon}]`);
-            return [data.lat, data.lon];
+    async function handleGalleryImages(event) {
+      const files = Array.from(event.target.files);
+      if (files.length === 0) return;
+      
+      document.getElementById('galleryUploading').classList.add('active');
+      document.getElementById('galleryComplete').style.display = 'none';
+      document.getElementById('galleryUpload').classList.add('uploading');
+
+      const progressBar = document.getElementById('galleryProgress');
+      let uploadedCount = 0;
+      let skippedCount = 0;
+      const totalFiles = files.length;
+
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) continue;
+
+        // Check for duplicate filename
+        const existingImage = galleryImagesData.find(img => img.filename === file.name);
+        if (existingImage) {
+          const confirmReplace = confirm(`"${file.name}" already uploaded. Replace it?`);
+          if (!confirmReplace) {
+            skippedCount++;
+            uploadedCount++;
+            const progress = Math.round((uploadedCount / totalFiles) * 100);
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = `${uploadedCount}/${totalFiles} photos`;
+            continue;
+          } else {
+            // Remove the old one
+            const index = galleryImagesData.findIndex(img => img.filename === file.name);
+            galleryImagesData.splice(index, 1);
           }
         }
-      } catch (error) {
-        console.warn(`API geocoding failed:`, error);
+
+        try {
+          const reader = new FileReader();
+          const imageData = await new Promise((resolve) => {
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+          });
+
+          // Get address for folder organization
+          const address = {
+            street: document.getElementById('street').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            state: document.getElementById('state').value.trim(),
+            zip: document.getElementById('zip').value.trim()
+          };
+
+          // Upload to Azure Blob Storage
+          const response = await fetch('/api/upload-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageData: imageData,
+              fileName: file.name,
+              address: address
+            })
+          });
+
+          const result = await response.json();
+          
+          if (result.success) {
+            galleryImagesData.push({
+              url: result.url,
+              filename: file.name
+            });
+          }
+          
+          uploadedCount++;
+          const progress = Math.round((uploadedCount / totalFiles) * 100);
+          progressBar.style.width = progress + '%';
+          progressBar.textContent = `${uploadedCount}/${totalFiles} photos`;
+          
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          uploadedCount++;
+        }
       }
+
+      displayGalleryPreview();
       
-      console.error(`✗ Could not geocode: ${address}`);
-      return null;
+      setTimeout(() => {
+        document.getElementById('galleryUploading').classList.remove('active');
+        if (galleryImagesData.length > 0) {
+          let message = `✓ ${galleryImagesData.length} photo${galleryImagesData.length > 1 ? 's' : ''} uploaded!`;
+          if (skippedCount > 0) {
+            message += ` (${skippedCount} skipped)`;
+          }
+          document.getElementById('galleryComplete').innerHTML = message;
+          document.getElementById('galleryComplete').style.display = 'flex';
+        }
+      }, 500);
+      
+      document.getElementById('galleryUpload').classList.remove('uploading');
     }
 
-    // Initialize map when page loads
-    window.addEventListener('load', () => {
-      initMap();
+    function displayPrimaryPreview(url, filename) {
+      const preview = document.getElementById('primaryPreview');
+      if (url) {
+        preview.innerHTML = `
+          <div class="preview-item">
+            <img src="${url}" alt="Primary image">
+            <div class="preview-label">${filename || 'Main Photo'}</div>
+            <button type="button" class="remove-image" onclick="removePrimaryImage()">×</button>
+          </div>
+        `;
+      } else {
+        preview.innerHTML = '';
+      }
+    }
+
+    function displayGalleryPreview() {
+      const preview = document.getElementById('galleryPreview');
+      preview.innerHTML = galleryImagesData.map((img, index) => `
+        <div class="preview-item">
+          <img src="${img.url}" alt="Gallery image ${index + 1}">
+          <div class="preview-label">${img.filename}</div>
+          <button type="button" class="remove-image" onclick="removeGalleryImage(${index})">×</button>
+        </div>
+      `).join('');
+    }
+
+    function removePrimaryImage() {
+      primaryImageUrl = '';
+      primaryImageFilename = '';
+      displayPrimaryPreview('', '');
+      document.getElementById('primaryImageInput').value = '';
+      document.getElementById('primaryComplete').style.display = 'none';
+    }
+
+    function removeGalleryImage(index) {
+      galleryImagesData.splice(index, 1);
+      displayGalleryPreview();
+      if (galleryImagesData.length === 0) {
+        document.getElementById('galleryComplete').style.display = 'none';
+      } else {
+        document.getElementById('galleryComplete').innerHTML = `✓ ${galleryImagesData.length} photo${galleryImagesData.length > 1 ? 's' : ''} uploaded!`;
+      }
+    }
+
+    // Price formatting
+    function formatPrice(input) {
+      // Remove all non-digits
+      let value = input.value.replace(/[^\d]/g, '');
+      
+      // Format with commas
+      if (value) {
+        value = parseInt(value).toLocaleString('en-US');
+        input.value = '$' + value;
+      } else {
+        input.value = '';
+      }
+    }
+
+    // Generate headline from address if not provided
+    function generateHeadline(street, city, state, zip) {
+      const parts = [street, city, state, zip].filter(p => p && p.trim());
+      return parts.join(', ');
+    }
+
+    // CRUD Operations
+    async function loadHomes() {
+      try {
+        const response = await fetch('/api/get-homes');
+        if (response.ok) {
+          const data = await response.json();
+          homes = data.items || [];
+        } else {
+          // Fallback to localStorage
+          const saved = localStorage.getItem(STORAGE_KEY);
+          homes = saved ? JSON.parse(saved) : [];
+        }
+      } catch (error) {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        homes = saved ? JSON.parse(saved) : [];
+      }
+      renderHomes();
+    }
+
+    async function saveHomes() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(homes));
+      
+      // Publish to website via API
+      try {
+        const response = await fetch('/api/save-homes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: homes })
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to publish');
+        }
+
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    function renderHomes() {
+      const container = document.getElementById('homesList');
+      
+      if (homes.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 3rem;">No homes added yet. Click "Add New Home" to get started.</p>';
+        return;
+      }
+
+      container.innerHTML = homes.map(home => `
+        <div class="home-item">
+          <img src="${home.primaryImage}" alt="${home.headline}">
+          <div class="home-info">
+            <h3>${home.headline}</h3>
+            <p><strong>${home.street}</strong></p>
+            <p>${home.city}, ${home.state} ${home.zip || ''}</p>
+            <p>🛏️ ${home.bedrooms} bed | 🛁 ${home.bathrooms} bath | 🚗 ${home.parking || 0} parking</p>
+            <span class="home-status ${home.status.toLowerCase().replace(' ', '-')}">${home.status}</span>
+          </div>
+          <div class="home-actions">
+            <button onclick="editHome('${home.id}')">Edit</button>
+            <button class="danger" onclick="deleteHome('${home.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openAddModal() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = 'Add New Home';
+      document.getElementById('homeForm').reset();
+      document.getElementById('homeId').value = '';
+      primaryImageUrl = '';
+      primaryImageFilename = '';
+      galleryImagesData = [];
+      displayPrimaryPreview('', '');
+      displayGalleryPreview();
+      document.getElementById('primaryComplete').style.display = 'none';
+      document.getElementById('galleryComplete').style.display = 'none';
+      document.getElementById('formMessage').style.display = 'none';
+      document.getElementById('homeModal').classList.add('active');
+    }
+
+    function editHome(id) {
+      const home = homes.find(h => h.id === id);
+      if (!home) return;
+
+      editingId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Home';
+      document.getElementById('homeId').value = id;
+      document.getElementById('headline').value = home.headline;
+      document.getElementById('street').value = home.street;
+      document.getElementById('city').value = home.city;
+      document.getElementById('state').value = home.state;
+      document.getElementById('zip').value = home.zip || '';
+      document.getElementById('description').value = home.description || '';
+      document.getElementById('bedrooms').value = home.bedrooms;
+      document.getElementById('bathrooms').value = home.bathrooms;
+      document.getElementById('parking').value = home.parking || '';
+      document.getElementById('garage').value = home.garage || '';
+      document.getElementById('status').value = home.status;
+      document.getElementById('price').value = home.price || '';
+      document.getElementById('features').value = (home.features || []).join('\n');
+
+      primaryImageUrl = home.primaryImage;
+      primaryImageFilename = 'existing-image.jpg'; // For existing images
+      
+      // Convert gallery URLs to data structure with placeholder filenames
+      galleryImagesData = (home.additionalImages || []).map((url, index) => ({
+        url: url,
+        filename: `existing-${index + 1}.jpg`
+      }));
+      
+      displayPrimaryPreview(primaryImageUrl, primaryImageFilename);
+      displayGalleryPreview();
+      
+      // Show completion indicators if images exist
+      if (primaryImageUrl) {
+        document.getElementById('primaryComplete').style.display = 'flex';
+      }
+      if (galleryImagesData.length > 0) {
+        document.getElementById('galleryComplete').innerHTML = `✓ ${galleryImagesData.length} photo${galleryImagesData.length > 1 ? 's' : ''} uploaded!`;
+        document.getElementById('galleryComplete').style.display = 'flex';
+      }
+      
+      document.getElementById('formMessage').style.display = 'none';
+
+      document.getElementById('homeModal').classList.add('active');
+    }
+
+    async function deleteHome(id) {
+      if (!confirm('Are you sure you want to delete this home?')) return;
+      
+      homes = homes.filter(h => h.id !== id);
+      
+      try {
+        await saveHomes();
+        renderHomes();
+        alert('Home deleted and website updated!');
+      } catch (error) {
+        alert('Error deleting home: ' + error.message);
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('homeModal').classList.remove('active');
+    }
+
+    // Form Submit
+    document.getElementById('homeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!primaryImageUrl) {
+        showFormMessage('⚠️ Please upload a main property photo', 'error');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Publishing...';
+
+      // Show publishing progress
+      const progressContainer = document.getElementById('publishingProgress');
+      progressContainer.classList.add('active');
+      
+      // Reset all steps
+      document.getElementById('step1').classList.remove('active', 'complete');
+      document.getElementById('step2').classList.remove('active', 'complete');
+      document.getElementById('step3').classList.remove('active', 'complete');
+      document.getElementById('finalSuccess').classList.remove('active');
+
+      try {
+        // Step 1: Prepare data
+        document.getElementById('step1').classList.add('active');
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const street = document.getElementById('street').value;
+        const city = document.getElementById('city').value;
+        const state = document.getElementById('state').value;
+        const zip = document.getElementById('zip').value;
+        
+        // Use provided headline or generate from address
+        let headline = document.getElementById('headline').value.trim();
+        if (!headline) {
+          headline = generateHeadline(street, city, state, zip);
+        }
+        
+        // Use provided description or empty string
+        const description = document.getElementById('description').value.trim() || '';
+        
+        // Format price - remove $ and commas for storage
+        let price = document.getElementById('price').value;
+        if (price) {
+          price = price.replace(/[$,]/g, '');
+          // Re-format for display
+          price = '$' + parseInt(price).toLocaleString('en-US');
+        }
+
+        const formData = {
+          id: document.getElementById('homeId').value || generateId(),
+          headline: headline,
+          street: street,
+          city: city,
+          state: state,
+          zip: zip,
+          description: description,
+          bedrooms: parseInt(document.getElementById('bedrooms').value),
+          bathrooms: parseFloat(document.getElementById('bathrooms').value),
+          parking: parseInt(document.getElementById('parking').value) || 0,
+          garage: parseInt(document.getElementById('garage').value) || 0,
+          status: document.getElementById('status').value,
+          price: price,
+          primaryImage: primaryImageUrl,
+          additionalImages: galleryImagesData.map(img => img.url),
+          features: document.getElementById('features').value
+            .split('\n')
+            .map(f => f.trim())
+            .filter(f => f),
+          ctaLabel: document.getElementById('status').value === 'Sold' ? 'View Details' : 'Schedule Viewing',
+          ctaUrl: `home-details.html?id=${document.getElementById('homeId').value || generateId()}`
+        };
+
+        // Try to geocode the address and store coordinates
+        const fullAddress = `${street}, ${city}, ${state} ${zip}`.trim();
+        try {
+          const geocodeResponse = await fetch('/api/geocode-address', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address: fullAddress })
+          });
+          
+          if (geocodeResponse.ok) {
+            const geocodeData = await geocodeResponse.json();
+            if (geocodeData.success) {
+              formData.latitude = geocodeData.lat;
+              formData.longitude = geocodeData.lon;
+              console.log(`✓ Geocoded: [${geocodeData.lat}, ${geocodeData.lon}]`);
+            }
+          }
+        } catch (error) {
+          console.warn('Could not geocode address:', error);
+          // Continue without coordinates - not critical
+        }
+
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step1').classList.add('complete');
+
+        // Step 2: Save to local storage
+        document.getElementById('step2').classList.add('active');
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        if (editingId) {
+          const index = homes.findIndex(h => h.id === editingId);
+          homes[index] = formData;
+        } else {
+          homes.push(formData);
+        }
+
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step2').classList.add('complete');
+
+        // Step 3: Publish to website
+        document.getElementById('step3').classList.add('active');
+        
+        const result = await saveHomes();
+        renderHomes();
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        document.getElementById('step3').classList.remove('active');
+        document.getElementById('step3').classList.add('complete');
+        
+        // Show final success
+        document.getElementById('finalSuccess').classList.add('active');
+        
+        setTimeout(() => {
+          closeModal();
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save & Publish';
+          progressContainer.classList.remove('active');
+        }, 2500);
+
+      } catch (error) {
+        progressContainer.classList.remove('active');
+        showFormMessage('❌ Error: ' + error.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save & Publish';
+      }
+    });
+
+    function showFormMessage(message, type) {
+      const messageDiv = document.getElementById('formMessage');
+      messageDiv.className = type;
+      messageDiv.textContent = message;
+      messageDiv.style.display = 'block';
+    }
+
+    function generateId() {
+      return 'home_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Zillow Import Functions
+    function openZillowModal() {
+      document.getElementById('zillowModal').classList.add('active');
+      document.getElementById('zillowUrl').value = '';
+      document.getElementById('importProgress').style.display = 'none';
+      document.getElementById('importError').style.display = 'none';
+    }
+
+    function closeZillowModal() {
+      document.getElementById('zillowModal').classList.remove('active');
+    }
+
+    async function importFromZillow() {
+      const url = document.getElementById('zillowUrl').value.trim();
+      
+      if (!url) {
+        showImportError('Please enter a valid URL');
+        return;
+      }
+
+      const importBtn = document.getElementById('importBtn');
+      const progressDiv = document.getElementById('importProgress');
+      const progressBar = document.getElementById('importProgressBar');
+      const statusText = document.getElementById('importStatus');
+      const errorDiv = document.getElementById('importError');
+
+      // Reset UI
+      errorDiv.style.display = 'none';
+      progressDiv.style.display = 'block';
+      importBtn.disabled = true;
+      importBtn.textContent = 'Importing...';
+      
+      progressBar.style.width = '20%';
+      statusText.textContent = 'Fetching listing data...';
+
+      try {
+        // Step 1: Parse the listing
+        const response = await fetch('/api/parse-zillow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to parse listing');
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error('Failed to extract listing data');
+        }
+
+        const listingData = result.data;
+        
+        progressBar.style.width = '40%';
+        statusText.textContent = `Found: ${listingData.headline}`;
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Step 2: Download and upload images
+        progressBar.style.width = '60%';
+        statusText.textContent = `Uploading ${listingData.images.length} photos...`;
+
+        const uploadedImages = [];
+        let primaryImageUrl = '';
+
+        // Get address for folder organization
+        const address = {
+          street: listingData.street,
+          city: listingData.city,
+          state: listingData.state,
+          zip: listingData.zip
+        };
+
+        for (let i = 0; i < Math.min(listingData.images.length, 15); i++) {
+          try {
+            const imageUrl = listingData.images[i];
+            
+            // Fetch image as blob
+            const imageResponse = await fetch(imageUrl);
+            const imageBlob = await imageResponse.blob();
+            
+            // Convert to base64
+            const reader = new FileReader();
+            const imageData = await new Promise((resolve) => {
+              reader.onload = (e) => resolve(e.target.result);
+              reader.readAsDataURL(imageBlob);
+            });
+
+            // Upload to Azure
+            const uploadResponse = await fetch('/api/upload-image', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageData: imageData,
+                fileName: `imported_${Date.now()}_${i}.jpg`,
+                address: address
+              })
+            });
+
+            const uploadResult = await uploadResponse.json();
+            
+            if (uploadResult.success) {
+              if (i === 0) {
+                primaryImageUrl = uploadResult.url;
+              } else {
+                uploadedImages.push(uploadResult.url);
+              }
+            }
+            
+            // Update progress
+            const imageProgress = 60 + (i / listingData.images.length) * 30;
+            progressBar.style.width = imageProgress + '%';
+            statusText.textContent = `Uploaded ${i + 1}/${Math.min(listingData.images.length, 15)} photos...`;
+            
+          } catch (error) {
+            console.error(`Failed to upload image ${i}:`, error);
+          }
+        }
+
+        progressBar.style.width = '90%';
+        statusText.textContent = 'Pre-filling form...';
+
+        // Step 3: Close Zillow modal and open add modal with pre-filled data
+        closeZillowModal();
+        
+        // Open the add modal
+        openAddModal();
+        
+        // Pre-fill the form
+        document.getElementById('headline').value = listingData.headline || '';
+        document.getElementById('street').value = listingData.street || '';
+        document.getElementById('city').value = listingData.city || '';
+        document.getElementById('state').value = listingData.state || '';
+        document.getElementById('zip').value = listingData.zip || '';
+        document.getElementById('description').value = listingData.description || '';
+        document.getElementById('bedrooms').value = listingData.bedrooms || '';
+        document.getElementById('bathrooms').value = listingData.bathrooms || '';
+        document.getElementById('price').value = listingData.price || '';
+        
+        // Set images
+        primaryImageUrl = primaryImageUrl || listingData.images[0];
+        primaryImageFilename = 'imported-primary.jpg';
+        
+        galleryImagesData = uploadedImages.map((url, index) => ({
+          url: url,
+          filename: `imported-${index + 1}.jpg`
+        }));
+        
+        displayPrimaryPreview(primaryImageUrl, primaryImageFilename);
+        displayGalleryPreview();
+        
+        // Show completion indicators
+        if (primaryImageUrl) {
+          document.getElementById('primaryComplete').style.display = 'flex';
+        }
+        if (galleryImagesData.length > 0) {
+          document.getElementById('galleryComplete').innerHTML = `✓ ${galleryImagesData.length} photo${galleryImagesData.length > 1 ? 's' : ''} uploaded!`;
+          document.getElementById('galleryComplete').style.display = 'flex';
+        }
+        
+        showFormMessage('✓ Property imported successfully! Review and save.', 'success');
+
+      } catch (error) {
+        console.error('Import error:', error);
+        showImportError(error.message || 'Failed to import property. Please try again.');
+      } finally {
+        importBtn.disabled = false;
+        importBtn.textContent = 'Import Property';
+        setTimeout(() => {
+          progressDiv.style.display = 'none';
+        }, 2000);
+      }
+    }
+
+    function showImportError(message) {
+      const errorDiv = document.getElementById('importError');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    // Close modal on outside click
+    document.getElementById('homeModal').addEventListener('click', (e) => {
+      if (e.target.id === 'homeModal') {
+        closeModal();
+      }
+    });
+
+    document.getElementById('zillowModal').addEventListener('click', (e) => {
+      if (e.target.id === 'zillowModal') {
+        closeZillowModal();
+      }
     });
   </script>
 </body>
