@@ -1259,20 +1259,9 @@
     }
 
     async function geocodeAddress(address) {
-      // Temporary hardcoded coordinates for known addresses
-      const knownAddresses = {
-        '9909 Logan Dr, Potomac, MD 20854': [39.0297, -77.1525]
-      };
-      
-      // Check if we have hardcoded coordinates
-      const normalized = address.trim();
-      if (knownAddresses[normalized]) {
-        console.log(`✓ Using known coordinates for: ${address}`);
-        return knownAddresses[normalized];
-      }
-      
+      // Try API first
       try {
-        console.log(`Geocoding via server: ${address}`);
+        console.log(`Geocoding via API: ${address}`);
         
         const response = await fetch('/api/geocode-address', {
           method: 'POST',
@@ -1282,25 +1271,31 @@
           body: JSON.stringify({ address })
         });
         
-        if (!response.ok) {
-          console.error(`Geocoding HTTP error: ${response.status}`);
-          return null;
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.success) {
+            console.log(`✓ Geocoded via API: [${data.lat}, ${data.lon}]`);
+            return [data.lat, data.lon];
+          }
         }
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          console.log(`✓ Geocoded: [${data.lat}, ${data.lon}] - ${data.display_name}`);
-          return [data.lat, data.lon];
-        } else {
-          console.warn(`✗ No results found for: ${address}`);
-          return null;
-        }
-        
       } catch (error) {
-        console.error(`✗ Geocoding error for ${address}:`, error);
-        return null;
+        console.warn(`API geocoding failed, trying fallback:`, error);
       }
+      
+      // Fallback to hardcoded coordinates
+      const knownAddresses = {
+        '9909 Logan Dr, Potomac, MD 20854': [39.0118781, -77.1831618]
+      };
+      
+      const normalized = address.trim();
+      if (knownAddresses[normalized]) {
+        console.log(`✓ Using fallback coordinates for: ${address}`);
+        return knownAddresses[normalized];
+      }
+      
+      console.error(`✗ Could not geocode: ${address}`);
+      return null;
     }
 
     // Update Google Maps and Apple Maps buttons

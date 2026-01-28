@@ -3,18 +3,22 @@ const https = require('https');
 module.exports = async function (context, req) {
     context.log('Geocode address function triggered');
 
-    // Enable CORS
-    context.res = {
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-        }
+    // Enable CORS - Set headers first
+    const corsHeaders = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
     };
 
+    context.res = {
+        headers: corsHeaders
+    };
+
+    // Handle preflight OPTIONS request
     if (req.method === 'OPTIONS') {
         context.res.status = 200;
+        context.res.body = {};
         return;
     }
 
