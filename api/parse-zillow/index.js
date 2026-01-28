@@ -68,21 +68,41 @@ function fetchPage(url) {
         const urlObj = new URL(url);
         const client = urlObj.protocol === 'https:' ? https : http;
         
+        // Enhanced browser-like headers
         const options = {
             hostname: urlObj.hostname,
             path: urlObj.pathname + urlObj.search,
             method: 'GET',
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'Accept-Language': 'en-US,en;q=0.9',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1'
-            }
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Cache-Control': 'max-age=0',
+                'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"macOS"',
+                'DNT': '1',
+                'Referer': 'https://www.google.com/'
+            },
+            timeout: 15000
         };
 
         const req = client.request(options, (res) => {
+            // Handle redirects
+            if (res.statusCode === 301 || res.statusCode === 302) {
+                const redirectUrl = res.headers.location;
+                if (redirectUrl) {
+                    return fetchPage(redirectUrl).then(resolve).catch(reject);
+                }
+            }
+
             let data = '';
 
             res.on('data', (chunk) => {
@@ -93,13 +113,18 @@ function fetchPage(url) {
                 if (res.statusCode === 200) {
                     resolve(data);
                 } else {
-                    reject(new Error(`HTTP ${res.statusCode}: Failed to fetch page`));
+                    reject(new Error(`HTTP ${res.statusCode}: Failed to fetch page. Zillow may be blocking automated requests.`));
                 }
             });
         });
 
         req.on('error', (error) => {
-            reject(error);
+            reject(new Error(`Network error: ${error.message}`));
+        });
+
+        req.on('timeout', () => {
+            req.destroy();
+            reject(new Error('Request timeout. Please try again.'));
         });
 
         req.end();
