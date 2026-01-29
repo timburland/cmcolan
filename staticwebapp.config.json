@@ -1,6 +1,18 @@
 {
   "routes": [
     {
+      "route": "/our-homes",
+      "rewrite": "/our-homes.html"
+    },
+    {
+      "route": "/coming-soon",
+      "rewrite": "/coming-soon.html"
+    },
+    {
+      "route": "/home-details",
+      "rewrite": "/home-details.html"
+    },
+    {
       "route": "/admin",
       "serve": "/admin/index.html",
       "statusCode": 200
@@ -10,5 +22,9 @@
       "serve": "/admin/index.html",
       "statusCode": 200
     }
-  ]
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/admin/*", "*.{css,js,jpg,jpeg,png,gif,svg,json,ico}", "/api/*"]
+  }
 }

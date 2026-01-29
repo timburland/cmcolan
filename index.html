@@ -123,11 +123,12 @@
       background-position: center;
       transition: opacity 1.2s ease-in-out;
       opacity: 0;
-      cursor: pointer;
+      z-index: 0;
     }
 
     .hero-bg.active {
       opacity: 1;
+      z-index: 1;
     }
 
     .hero-bg::after {
@@ -135,13 +136,19 @@
       position: absolute;
       inset: 0;
       background: rgba(31, 51, 71, 0.45);
+      pointer-events: none;
     }
 
     .hero-content {
       max-width: 900px;
       padding: 2rem;
       position: relative;
-      z-index: 1;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hero-content .btn {
+      pointer-events: auto;
     }
 
     .hero h1 {
@@ -208,7 +215,7 @@
       height: 50px;
       font-size: 24px;
       cursor: pointer;
-      z-index: 2;
+      z-index: 20;
       transition: background 0.3s ease;
       display: flex;
       align-items: center;
@@ -234,7 +241,7 @@
       transform: translateX(-50%);
       display: flex;
       gap: 10px;
-      z-index: 2;
+      z-index: 20;
     }
 
     .hero-dot {
@@ -505,16 +512,16 @@
   <!-- Header Navigation -->
   <header class="header">
     <div class="nav-container">
-      <a href="index.html" class="logo">
+      <a href="/" class="logo">
         <img src="conlanlogo.png" alt="C. M. Conlan Logo" class="logo-image" />
         <span>C. M. Conlan Contractors & Builders</span>
       </a>
       <nav>
         <ul class="nav-menu">
-          <li><a href="index.html">Home</a></li>
+          <li><a href="/">Home</a></li>
           <li><a href="#gallery">Photo Gallery</a></li>
-          <li><a href="our-homes.html">Our Homes</a></li>
-          <li><a href="coming-soon.html">Coming Soon</a></li>
+          <li><a href="/our-homes">Our Homes</a></li>
+          <li><a href="/coming-soon">Coming Soon</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
@@ -524,10 +531,6 @@
 
   <!-- Hero Section - Clickable Slideshow -->
   <section class="hero" id="home">
-    <div class="hero-bg hero-bg-1"></div>
-    <div class="hero-bg hero-bg-2"></div>
-    <div class="hero-bg hero-bg-3"></div>
-
     <button class="hero-nav prev" onclick="navigateSlide(-1)">‹</button>
     <button class="hero-nav next" onclick="navigateSlide(1)">›</button>
 
@@ -584,7 +587,7 @@
         </div>
       </div>
       <div class="gallery-cta">
-        <a href="our-homes.html" class="btn">View Full Gallery</a>
+        <a href="/our-homes" class="btn">View Full Gallery</a>
       </div>
     </div>
   </section>
@@ -667,13 +670,13 @@
     // Slideshow - Load sold homes dynamically and make them clickable
     let soldHomes = [];
     let currentSlideIndex = 0;
+    let heroBgsArray = [];
 
     async function loadSlideshowHomes() {
       try {
         const res = await fetch('/api/get-homes');
         if (res.ok) {
           const data = await res.json();
-          // Get sold homes that should appear in slideshow
           soldHomes = (data.items || []).filter(h => h.status === 'Sold');
         }
       } catch (error) {
@@ -696,33 +699,34 @@
     function initSlideshow() {
       if (soldHomes.length === 0) return;
 
-      // Create background divs for each home
       const heroSection = document.querySelector('.hero');
-      const heroBgs = [];
       
       soldHomes.forEach((home, index) => {
         const bg = document.createElement('div');
         bg.className = 'hero-bg';
         bg.style.backgroundImage = `url('${home.primaryImage}')`;
+        bg.style.cursor = home.id.startsWith('static') ? 'default' : 'pointer';
         bg.dataset.index = index;
         bg.dataset.homeId = home.id;
         
-        // Make clickable - navigate to home details
         bg.onclick = function() {
           if (!home.id.startsWith('static')) {
-            window.location.href = `home-details.html?id=${home.id}`;
+            window.location.href = `/home-details?id=${home.id}`;
           }
         };
         
         heroSection.insertBefore(bg, heroSection.firstChild);
-        heroBgs.push(bg);
+        heroBgsArray.push(bg);
       });
 
       // Show first slide
-      heroBgs[0].classList.add('active');
+      if (heroBgsArray.length > 0) {
+        heroBgsArray[0].classList.add('active');
+      }
 
       // Create dots
       const dotsContainer = document.getElementById('heroDots');
+      dotsContainer.innerHTML = '';
       soldHomes.forEach((_, index) => {
         const dot = document.createElement('div');
         dot.className = 'hero-dot';
@@ -738,44 +742,54 @@
     }
 
     function navigateSlide(direction) {
-      const heroBgs = document.querySelectorAll('.hero-bg');
+      if (heroBgsArray.length === 0) return;
+      
       const dots = document.querySelectorAll('.hero-dot');
       
-      heroBgs[currentSlideIndex].classList.remove('active');
-      dots[currentSlideIndex].classList.remove('active');
+      heroBgsArray[currentSlideIndex].classList.remove('active');
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.remove('active');
 
       currentSlideIndex = (currentSlideIndex + direction + soldHomes.length) % soldHomes.length;
 
-      heroBgs[currentSlideIndex].classList.add('active');
-      dots[currentSlideIndex].classList.add('active');
+      heroBgsArray[currentSlideIndex].classList.add('active');
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
     }
 
     function goToSlide(index) {
-      const heroBgs = document.querySelectorAll('.hero-bg');
+      if (heroBgsArray.length === 0) return;
+      
       const dots = document.querySelectorAll('.hero-dot');
       
-      heroBgs[currentSlideIndex].classList.remove('active');
-      dots[currentSlideIndex].classList.remove('active');
+      heroBgsArray[currentSlideIndex].classList.remove('active');
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.remove('active');
 
       currentSlideIndex = index;
 
-      heroBgs[currentSlideIndex].classList.add('active');
-      dots[currentSlideIndex].classList.add('active');
+      heroBgsArray[currentSlideIndex].classList.add('active');
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
     }
 
     // Initialize map
     async function initMap() {
+      const mapElement = document.getElementById('map');
+      if (!mapElement) return;
+
+      // Wait for Leaflet to be fully loaded
+      if (typeof L === 'undefined') {
+        console.log('Leaflet not loaded yet, retrying...');
+        setTimeout(initMap, 200);
+        return;
+      }
+
       try {
         const res = await fetch("/api/get-homes");
         const data = await res.json();
         const soldHomes = (data.items || []).filter(h => h.status === 'Sold' && h.latitude && h.longitude);
 
-        if (soldHomes.length === 0) return;
-
         const map = L.map('map').setView([39.1434, -77.2014], 11);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          attribution: '© OpenStreetMap contributors',
           maxZoom: 19
         }).addTo(map);
 
@@ -788,7 +802,7 @@
                    style="width: 100%; max-width: 200px; height: 120px; object-fit: cover; margin-bottom: 8px; border-radius: 4px;" />
               <h4 style="margin: 0 0 4px; font-size: 14px;">${home.headline}</h4>
               <p style="margin: 0 0 8px; font-size: 12px; color: #666;">${home.street || ''}</p>
-              <a href="home-details.html?id=${home.id}" 
+              <a href="/home-details?id=${home.id}" 
                  style="display: inline-block; padding: 6px 12px; background: #b8935f; color: white; text-decoration: none; border-radius: 4px; font-size: 12px;">
                 View Details
               </a>
@@ -800,9 +814,15 @@
       }
     }
 
-    // Initialize
-    loadSlideshowHomes();
-    initMap();
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSlideshowHomes();
+      
+      // Give Leaflet time to load
+      setTimeout(() => {
+        initMap();
+      }, 500);
+    });
 
     // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
