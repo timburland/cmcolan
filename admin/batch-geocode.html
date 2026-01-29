@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch Geocode Homes - Admin Utility</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 3rem;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    h1 {
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: #718096;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .info-box {
+      background: #edf2f7;
+      border-left: 4px solid #667eea;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      border-radius: 4px;
+    }
+
+    .info-box p {
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .progress-container {
+      display: none;
+      margin-top: 2rem;
+    }
+
+    .progress-container.active {
+      display: block;
+    }
+
+    .progress-bar {
+      background: #e2e8f0;
+      border-radius: 8px;
+      height: 12px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      text-align: center;
+      color: #4a5568;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .log-container {
+      background: #1a202c;
+      border-radius: 8px;
+      padding: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+    }
+
+    .log-entry {
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .log-entry.success {
+      color: #48bb78;
+    }
+
+    .log-entry.error {
+      color: #f56565;
+    }
+
+    .log-entry.info {
+      color: #90cdf4;
+    }
+
+    .log-entry.warning {
+      color: #f6e05e;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .stat-card {
+      background: #f7fafc;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #718096;
+      margin-top: 0.25rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗺️ Batch Geocode Homes</h1>
+    <p class="subtitle">Add map coordinates to all your homes</p>
+
+    <div class="info-box">
+      <p><strong>What does this do?</strong></p>
+      <p>This utility will go through all your homes and add precise map coordinates (latitude/longitude) so they appear as pins on your homepage map.</p>
+      <p style="margin-top: 1rem;"><strong>How it works:</strong></p>
+      <p>1. Loads all homes from your database</p>
+      <p>2. Checks which ones are missing coordinates</p>
+      <p>3. Geocodes each address using OpenStreetMap</p>
+      <p>4. Saves the updated homes back to the database</p>
+    </div>
+
+    <button class="btn" id="startBtn" onclick="startGeocoding()">Start Geocoding</button>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">Processing...</div>
+
+      <div class="log-container" id="logContainer"></div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="totalCount">0</div>
+          <div class="stat-label">Total Homes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="successCount">0</div>
+          <div class="stat-label">Geocoded</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="errorCount">0</div>
+          <div class="stat-label">Errors</div>
+        </div>
+      </div>
+    </div>
+
+    <a href="/admin" class="back-link">← Back to Admin Portal</a>
+  </div>
+
+  <script>
+    let totalHomes = 0;
+    let geocodedCount = 0;
+    let errorCount = 0;
+
+    function addLog(message, type = 'info') {
+      const logContainer = document.getElementById('logContainer');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    function updateProgress(current, total) {
+      const percent = (current / total) * 100;
+      document.getElementById('progressFill').style.width = `${percent}%`;
+      document.getElementById('progressText').textContent = `Processing ${current} of ${total} homes...`;
+    }
+
+    function updateStats(total, success, errors) {
+      document.getElementById('totalCount').textContent = total;
+      document.getElementById('successCount').textContent = success;
+      document.getElementById('errorCount').textContent = errors;
+    }
+
+    async function geocodeAddress(address) {
+      try {
+        const response = await fetch('/api/geocode-address', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Geocoding failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+          return { lat: data.lat, lon: data.lon };
+        } else {
+          throw new Error(data.error || 'Geocoding failed');
+        }
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    async function startGeocoding() {
+      const startBtn = document.getElementById('startBtn');
+      const progressContainer = document.getElementById('progressContainer');
+      
+      startBtn.disabled = true;
+      startBtn.textContent = 'Processing...';
+      progressContainer.classList.add('active');
+
+      totalHomes = 0;
+      geocodedCount = 0;
+      errorCount = 0;
+
+      try {
+        addLog('Loading homes from database...', 'info');
+
+        // Load homes
+        const response = await fetch('/api/get-homes');
+        if (!response.ok) {
+          throw new Error('Failed to load homes');
+        }
+
+        const data = await response.json();
+        const homes = data.items || [];
+
+        if (homes.length === 0) {
+          addLog('No homes found in database', 'warning');
+          startBtn.textContent = 'No Homes Found';
+          return;
+        }
+
+        totalHomes = homes.length;
+        addLog(`Found ${totalHomes} homes`, 'info');
+        updateStats(totalHomes, 0, 0);
+
+        // Find homes without coordinates
+        const homesNeedingGeocode = homes.filter(home => 
+          !home.latitude || !home.longitude
+        );
+
+        if (homesNeedingGeocode.length === 0) {
+          addLog('All homes already have coordinates! ✓', 'success');
+          addLog(`${totalHomes} homes already geocoded`, 'info');
+          startBtn.textContent = 'Already Complete ✓';
+          geocodedCount = totalHomes;
+          updateStats(totalHomes, totalHomes, 0);
+          return;
+        }
+
+        addLog(`${homesNeedingGeocode.length} homes need geocoding`, 'info');
+
+        // Geocode each home
+        for (let i = 0; i < homesNeedingGeocode.length; i++) {
+          const home = homesNeedingGeocode[i];
+          const fullAddress = `${home.street}, ${home.city}, ${home.state} ${home.zip || ''}`.trim();
+
+          updateProgress(i + 1, homesNeedingGeocode.length);
+          addLog(`Geocoding: ${home.headline || fullAddress}`, 'info');
+
+          try {
+            const coords = await geocodeAddress(fullAddress);
+            
+            // Update home with coordinates
+            home.latitude = coords.lat;
+            home.longitude = coords.lon;
+            
+            geocodedCount++;
+            addLog(`✓ ${home.headline}: [${coords.lat.toFixed(6)}, ${coords.lon.toFixed(6)}]`, 'success');
+            updateStats(totalHomes, geocodedCount, errorCount);
+
+            // Small delay to be respectful to geocoding service
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          } catch (error) {
+            errorCount++;
+            addLog(`✗ Failed to geocode ${home.headline}: ${error.message}`, 'error');
+            updateStats(totalHomes, geocodedCount, errorCount);
+          }
+        }
+
+        // Save updated homes back to database
+        addLog('Saving updated homes to database...', 'info');
+        
+        const saveResponse = await fetch('/api/save-homes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: homes })
+        });
+
+        if (!saveResponse.ok) {
+          throw new Error('Failed to save homes');
+        }
+
+        addLog('✓ All changes saved successfully!', 'success');
+        addLog(`Summary: ${geocodedCount} homes geocoded, ${errorCount} errors`, 'info');
+        
+        document.getElementById('progressText').textContent = 'Complete!';
+        startBtn.textContent = 'Geocoding Complete ✓';
+        startBtn.style.background = '#48bb78';
+
+      } catch (error) {
+        addLog(`✗ Error: ${error.message}`, 'error');
+        startBtn.disabled = false;
+        startBtn.textContent = 'Try Again';
+      }
+    }
+  </script>
+</body>
+</html>
