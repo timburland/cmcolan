@@ -264,13 +264,19 @@
         });
 
         if (!response.ok) {
-          throw new Error(`Geocoding failed: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Geocoding failed: ${response.status}`);
         }
 
         const data = await response.json();
         
         if (data.success) {
-          return { lat: data.lat, lon: data.lon };
+          return { 
+            lat: data.lat, 
+            lon: data.lon,
+            display_name: data.display_name,
+            strategy: data.strategy
+          };
         } else {
           throw new Error(data.error || 'Geocoding failed');
         }
@@ -345,11 +351,12 @@
             home.longitude = coords.lon;
             
             geocodedCount++;
-            addLog(`✓ ${home.headline}: [${coords.lat.toFixed(6)}, ${coords.lon.toFixed(6)}]`, 'success');
+            const strategyInfo = coords.strategy ? ` (${coords.strategy})` : '';
+            addLog(`✓ ${home.headline}: [${coords.lat.toFixed(6)}, ${coords.lon.toFixed(6)}]${strategyInfo}`, 'success');
             updateStats(totalHomes, geocodedCount, errorCount);
 
             // Small delay to be respectful to geocoding service
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1500));
           } catch (error) {
             errorCount++;
             addLog(`✗ Failed to geocode ${home.headline}: ${error.message}`, 'error');
