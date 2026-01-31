@@ -277,6 +277,16 @@
       align-items: start;
     }
 
+    /* FIX: Prevent grid children from overflowing */
+    .two-column > * {
+      min-width: 0;
+    }
+
+    .about-content {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
     .about-image-wrapper {
       position: relative;
     }
