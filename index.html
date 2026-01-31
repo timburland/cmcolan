@@ -1,839 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>C. M. Conlan Contractors & Builders | Custom Home Builder in Montgomery County, MD</title>
-  <meta name="description" content="Award-winning custom home builder and general contractor in Montgomery County, Maryland with over 35 years of experience in residential construction and renovations." />
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Leaflet CSS for Interactive Map -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
-  <style>
-    :root {
-      --primary-dark: #1f3347;
-      --accent-gold: #b8935f;
-      --text-dark: #2d2d2d;
-      --text-light: #666666;
-      --bg-cream: #f8f6f3;
-      --bg-white: #ffffff;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: "Montserrat", sans-serif;
-      color: var(--text-dark);
-      line-height: 1.7;
-      overflow-x: hidden;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-      font-family: "Cormorant Garamond", serif;
-      font-weight: 600;
-      line-height: 1.2;
-      color: var(--primary-dark);
-    }
-
-    /* Header Navigation */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      z-index: 1000;
-    }
-
-    .nav-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 3rem;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-family: "Cormorant Garamond", serif;
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--primary-dark);
-      text-decoration: none;
-    }
-
-    .logo-image {
-      height: 45px;
-      width: auto;
-    }
-
-    .nav-menu {
-      display: flex;
-      list-style: none;
-      gap: 2.5rem;
-      align-items: center;
-    }
-
-    .nav-menu a {
-      color: var(--text-dark);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .nav-menu a:hover {
-      color: var(--accent-gold);
-    }
-
-    .mobile-menu-btn {
-      display: none;
-    }
-
-    /* Hero Section - Full Screen Slideshow */
-    .hero {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: white;
-      position: relative;
-      margin-top: 70px;
-      overflow: hidden;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      transition: opacity 1.2s ease-in-out;
-      opacity: 0;
-      z-index: 0;
-    }
-
-    .hero-bg.active {
-      opacity: 1;
-      z-index: 1;
-    }
-
-    .hero-bg::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(31, 51, 71, 0.45);
-      pointer-events: none;
-    }
-
-    .hero-content {
-      max-width: 900px;
-      padding: 2rem;
-      position: relative;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .hero-content .btn {
-      pointer-events: auto;
-    }
-
-    .hero h1 {
-      font-size: 4rem;
-      color: white;
-      margin-bottom: 1rem;
-      font-weight: 400;
-    }
-
-    .hero-subtitle {
-      font-size: 1rem;
-      margin-bottom: 1.5rem;
-      font-weight: 500;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      opacity: 0.95;
-    }
-
-    .hero-location {
-      font-size: 1.1rem;
-      margin-bottom: 2.5rem;
-      font-weight: 300;
-      opacity: 0.9;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 1rem 2.5rem;
-      background: var(--accent-gold);
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-      letter-spacing: 1.5px;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      font-size: 0.85rem;
-    }
-
-    .btn:hover {
-      background: #9a7749;
-      transform: translateY(-2px);
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 2px solid white;
-      margin-left: 1rem;
-    }
-
-    .btn-outline:hover {
-      background: white;
-      color: var(--primary-dark);
-    }
-
-    /* Navigation Dots & Arrows */
-    .hero-nav {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.25);
-      border: none;
-      color: white;
-      width: 50px;
-      height: 50px;
-      font-size: 24px;
-      cursor: pointer;
-      z-index: 20;
-      transition: background 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .hero-nav:hover {
-      background: rgba(255, 255, 255, 0.4);
-    }
-
-    .hero-nav.prev {
-      left: 20px;
-    }
-
-    .hero-nav.next {
-      right: 20px;
-    }
-
-    .hero-dots {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-      z-index: 20;
-    }
-
-    .hero-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.5);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .hero-dot.active {
-      background: white;
-      width: 30px;
-      border-radius: 5px;
-    }
-
-    /* About Section */
-    .about-section {
-      padding: 8rem 3rem;
-      background: white;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .two-column {
-      display: grid;
-      grid-template-columns: 45% 55%;
-      gap: 6rem;
-      align-items: start;
-    }
-
-    .about-image-wrapper {
-      position: relative;
-    }
-
-    .about-image-wrapper::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--accent-gold);
-    }
-
-    .about-image {
-      width: 100%;
-      height: 600px;
-      object-fit: cover;
-    }
-
-    .about-content h2 {
-      font-size: 3.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .about-content p {
-      font-size: 1.05rem;
-      color: var(--text-light);
-      margin-bottom: 1.5rem;
-      line-height: 1.8;
-    }
-
-    .about-content strong {
-      color: var(--text-dark);
-      font-weight: 600;
-    }
-
-    /* Gallery Section */
-    .gallery-section {
-      padding: 8rem 3rem;
-      background: var(--bg-cream);
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: 3.5rem;
-      margin-bottom: 4rem;
-    }
-
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-      max-width: 1400px;
-      margin: 0 auto 3rem;
-    }
-
-    .gallery-item {
-      position: relative;
-      overflow: hidden;
-      height: 400px;
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-
-    .gallery-item:hover img {
-      transform: scale(1.08);
-    }
-
-    .gallery-cta {
-      text-align: center;
-    }
-
-    /* Map Section */
-    .map-section {
-      padding: 8rem 3rem;
-      background: white;
-    }
-
-    .map-intro {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-
-    .map-intro p {
-      font-size: 1.1rem;
-      color: var(--text-light);
-      max-width: 700px;
-      margin: 1rem auto 0;
-    }
-
-    #map {
-      height: 600px;
-      border-radius: 4px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    /* Testimonials Section - 3 in a row */
-    .testimonials-section {
-      padding: 8rem 3rem;
-      background: var(--bg-cream);
-    }
-
-    .testimonials-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2.5rem;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .testimonial-card {
-      background: white;
-      padding: 3rem 2.5rem;
-      border-left: 3px solid var(--accent-gold);
-      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
-      transition: transform 0.3s ease;
-    }
-
-    .testimonial-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .testimonial-text {
-      font-size: 1rem;
-      line-height: 1.8;
-      color: var(--text-light);
-      margin-bottom: 2rem;
-      font-style: italic;
-    }
-
-    .testimonial-author {
-      font-weight: 600;
-      color: var(--primary-dark);
-      font-size: 1rem;
-      font-style: normal;
-    }
-
-    /* Footer */
-    .footer {
-      background: var(--primary-dark);
-      color: white;
-      padding: 4rem 3rem 2rem;
-    }
-
-    .footer-content {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4rem;
-      max-width: 1400px;
-      margin: 0 auto 3rem;
-    }
-
-    .footer h3 {
-      color: var(--accent-gold);
-      margin-bottom: 1.5rem;
-      font-size: 1.4rem;
-    }
-
-    .footer p, .footer a {
-      color: rgba(255, 255, 255, 0.85);
-      text-decoration: none;
-      line-height: 1.8;
-      font-size: 0.95rem;
-    }
-
-    .footer a:hover {
-      color: var(--accent-gold);
-    }
-
-    .footer-links {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .social-icons {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .social-icons a {
-      width: 40px;
-      height: 40px;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
-    }
-
-    .social-icons a:hover {
-      background: var(--accent-gold);
-      transform: translateY(-3px);
-    }
-
-    .footer-bottom {
-      text-align: center;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.9rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 768px) {
-      .two-column { grid-template-columns: 1fr; }
-      .testimonials-row { grid-template-columns: 1fr; }
-      .gallery-grid { grid-template-columns: 1fr; }
-      #map { height: 400px; }
-      .footer-content { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 2.5rem; }
-      .section-title { font-size: 2.5rem; }
-    }
-  </style>
-</head>
-<body>
-  <!-- Header Navigation -->
-  <header class="header">
-    <div class="nav-container">
-      <a href="/" class="logo">
-        <img src="conlanlogo.png" alt="C. M. Conlan Logo" class="logo-image" />
-        <span>C. M. Conlan Contractors & Builders</span>
-      </a>
-      <nav>
-        <ul class="nav-menu">
-          <li><a href="/">Home</a></li>
-          <li><a href="#gallery">Photo Gallery</a></li>
-          <li><a href="/our-homes">Our Homes</a></li>
-          <li><a href="/coming-soon">Coming Soon</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Hero Section - Clickable Slideshow -->
-  <section class="hero" id="home">
-    <button class="hero-nav prev" onclick="navigateSlide(-1)">‹</button>
-    <button class="hero-nav next" onclick="navigateSlide(1)">›</button>
-
-    <div class="hero-content">
-      <h1>Building and Renovating Fine Homes</h1>
-      <p class="hero-subtitle">Expert Craftsmanship, Built to Last</p>
-      <p class="hero-location">In Montgomery County, MD and the Greater Washington, D.C. Area</p>
-      <a href="#about" class="btn">About Us</a>
-      <a href="#gallery" class="btn btn-outline">View Our Work</a>
-    </div>
-
-    <div class="hero-dots" id="heroDots"></div>
-  </section>
-
-  <!-- About Section -->
-  <section class="about-section" id="about">
-    <div class="container">
-      <div class="two-column">
-        <div class="about-image-wrapper">
-          <img src="chrisconlanheadshot.png" alt="Chris Conlan" class="about-image" />
-        </div>
-        <div class="about-content">
-          <h2>Meet Chris Conlan</h2>
-          <p><strong>C. M. Conlan Contractors and Builders</strong> is a Bethesda-based firm well-known for its expertise in custom home construction and renovations throughout Montgomery County, Maryland—including Chevy Chase, Potomac, Rockville, and surrounding areas.</p>
-          <p>Founded in 1989 by Chris Conlan, our company has developed a reputation for expert craftsmanship, close attention to detail, and exceptional strength in design. With over 35 years of experience as a residential home builder and a background in real estate, Chris is an award-winning builder recognized by the Montgomery County Builder's Association and has been featured in Bethesda Magazine as one of the area's top builders.</p>
-          <p>We specialize in creating custom homes tailored to each family's specific needs—whether on a lot we help you find, a lot you currently own, or one of our available lots. We also offer expert renovations and additions for homeowners looking to upgrade. At C. M. Conlan, we believe in developing strong relationships between builder and client. You can depend on Chris to work closely with you throughout the entire process, remaining active and accessible from start to finish.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Gallery Section -->
-  <section class="gallery-section" id="gallery">
-    <div class="container">
-      <h2 class="section-title">Our Recent Work</h2>
-      <div class="gallery-grid">
-        <div class="gallery-item">
-          <img src="home_1.jpg" alt="Custom Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_2.jpg" alt="Custom Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_3.jpg" alt="Custom Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_4.jpg" alt="Custom Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_5.jpg" alt="Custom Home" />
-        </div>
-        <div class="gallery-item">
-          <img src="home_7.jpg" alt="Custom Home" />
-        </div>
-      </div>
-      <div class="gallery-cta">
-        <a href="/our-homes" class="btn">View Full Gallery</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Service Area Map -->
-  <section class="map-section" id="service-area">
-    <div class="container">
-      <div class="map-intro">
-        <h2 class="section-title">Our Footprint</h2>
-        <p>Explore our footprint across Montgomery County, Maryland. Each pin represents a custom home we've built with pride.</p>
-      </div>
-      <div id="map"></div>
-    </div>
-  </section>
-
-  <!-- Testimonials Section -->
-  <section class="testimonials-section" id="testimonials">
-    <div class="container">
-      <h2 class="section-title">What Our Clients Say</h2>
-      <div class="testimonials-row">
-        <div class="testimonial-card">
-          <p class="testimonial-text">"As a home builder myself, I appreciated the high quality and terrific service we received when Chris and his team built our custom home. They made it easy for us, from helping to design what we wanted to the final turnover. Everyone had a positive can-do attitude and was good to work with."</p>
-          <p class="testimonial-author">— Terry Eakin</p>
-        </div>
-        <div class="testimonial-card">
-          <p class="testimonial-text">"Chris's personal attention, focus on detail, customer orientation, high quality standards, and creativity in solving tough issues are unmatched. I can't imagine building a house with anyone else. Highly recommended!"</p>
-          <p class="testimonial-author">— Harris Family</p>
-        </div>
-        <div class="testimonial-card">
-          <p class="testimonial-text">"We bought our beautiful new home from C. M. Conlan and it still wows us years later. Every system has worked perfectly, and I am not easy to please. The craftsmanship is honestly perfection."</p>
-          <p class="testimonial-author">— The Jacobs</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer" id="contact">
-    <div class="container">
-      <div class="footer-content">
-        <div>
-          <h3>C. M. Conlan Contractors & Builders</h3>
-          <p>Building exceptional homes and lasting relationships in Montgomery County since 1989</p>
-          <p style="margin-top: 2rem;">© 2026 C. M. Conlan Contractors & Builders<br />All Rights Reserved</p>
-        </div>
-
-        <div>
-          <h3>Contact Us</h3>
-          <p>Bethesda, Maryland</p>
-          <p>Office: 301-983-1301</p>
-          <p>Fax: 301-983-2544</p>
-          <p>Email: <a href="mailto:chris@cmconlan.com">chris@cmconlan.com</a></p>
-        </div>
-
-        <div>
-          <h3>Connect With Us</h3>
-          <div class="social-icons">
-            <a href="#" aria-label="Facebook">f</a>
-            <a href="#" aria-label="Instagram">📷</a>
-            <a href="#" aria-label="LinkedIn">in</a>
-            <a href="#" aria-label="Houzz">H</a>
-          </div>
-          <div class="footer-links" style="margin-top: 2rem;">
-            <a href="#awards">Awards & Certifications</a>
-            <a href="#testimonials">Client Testimonials</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>Proudly serving all of Montgomery County, Maryland</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-  <script>
-    // Slideshow - Load sold homes dynamically and make them clickable
-    let soldHomes = [];
-    let currentSlideIndex = 0;
-    let heroBgsArray = [];
-
-    async function loadSlideshowHomes() {
-      try {
-        const res = await fetch('/api/get-homes');
-        if (res.ok) {
-          const data = await res.json();
-          soldHomes = (data.items || []).filter(h => h.status === 'Sold');
-        }
-      } catch (error) {
-        console.error('Error loading homes:', error);
-      }
-
-      // Fallback to static images if no sold homes
-      if (soldHomes.length === 0) {
-        soldHomes = [
-          { id: 'static1', primaryImage: 'home_1.jpg', headline: 'Custom Home 1' },
-          { id: 'static2', primaryImage: 'home_2.jpg', headline: 'Custom Home 2' },
-          { id: 'static3', primaryImage: 'home_5.jpg', headline: 'Custom Home 3' },
-          { id: 'static4', primaryImage: 'home_6.jpg', headline: 'Custom Home 4' }
-        ];
-      }
-
-      initSlideshow();
-    }
-
-    function initSlideshow() {
-      if (soldHomes.length === 0) return;
-
-      const heroSection = document.querySelector('.hero');
-      
-      soldHomes.forEach((home, index) => {
-        const bg = document.createElement('div');
-        bg.className = 'hero-bg';
-        bg.style.backgroundImage = `url('${home.primaryImage}')`;
-        bg.style.cursor = home.id.startsWith('static') ? 'default' : 'pointer';
-        bg.dataset.index = index;
-        bg.dataset.homeId = home.id;
-        
-        bg.onclick = function() {
-          if (!home.id.startsWith('static')) {
-            window.location.href = `/home-details?id=${home.id}`;
-          }
-        };
-        
-        heroSection.insertBefore(bg, heroSection.firstChild);
-        heroBgsArray.push(bg);
-      });
-
-      // Show first slide
-      if (heroBgsArray.length > 0) {
-        heroBgsArray[0].classList.add('active');
-      }
-
-      // Create dots
-      const dotsContainer = document.getElementById('heroDots');
-      dotsContainer.innerHTML = '';
-      soldHomes.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.className = 'hero-dot';
-        if (index === 0) dot.classList.add('active');
-        dot.onclick = () => goToSlide(index);
-        dotsContainer.appendChild(dot);
-      });
-
-      // Auto-advance slideshow
-      setInterval(() => {
-        navigateSlide(1);
-      }, 6000);
-    }
-
-    function navigateSlide(direction) {
-      if (heroBgsArray.length === 0) return;
-      
-      const dots = document.querySelectorAll('.hero-dot');
-      
-      heroBgsArray[currentSlideIndex].classList.remove('active');
-      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.remove('active');
-
-      currentSlideIndex = (currentSlideIndex + direction + soldHomes.length) % soldHomes.length;
-
-      heroBgsArray[currentSlideIndex].classList.add('active');
-      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
-    }
-
-    function goToSlide(index) {
-      if (heroBgsArray.length === 0) return;
-      
-      const dots = document.querySelectorAll('.hero-dot');
-      
-      heroBgsArray[currentSlideIndex].classList.remove('active');
-      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.remove('active');
-
-      currentSlideIndex = index;
-
-      heroBgsArray[currentSlideIndex].classList.add('active');
-      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
-    }
-
-    // Initialize map
-    async function initMap() {
-      const mapElement = document.getElementById('map');
-      if (!mapElement) return;
-
-      // Wait for Leaflet to be fully loaded
-      if (typeof L === 'undefined') {
-        console.log('Leaflet not loaded yet, retrying...');
-        setTimeout(initMap, 200);
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/get-homes");
-        const data = await res.json();
-        const soldHomes = (data.items || []).filter(h => h.status === 'Sold' && h.latitude && h.longitude);
-
-        const map = L.map('map').setView([39.1434, -77.2014], 11);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors',
-          maxZoom: 19
-        }).addTo(map);
-
-        soldHomes.forEach(home => {
-          const marker = L.marker([home.latitude, home.longitude]).addTo(map);
-          
-          marker.bindPopup(`
-            <div style="text-align: center; min-width: 200px;">
-              <img src="${home.primaryImage}" alt="${home.headline}" 
-                   style="width: 100%; max-width: 200px; height: 120px; object-fit: cover; margin-bottom: 8px; border-radius: 4px;" />
-              <h4 style="margin: 0 0 4px; font-size: 14px;">${home.headline}</h4>
-              <p style="margin: 0 0 8px; font-size: 12px; color: #666;">${home.street || ''}</p>
-              <a href="/home-details?id=${home.id}" 
-                 style="display: inline-block; padding: 6px 12px; background: #b8935f; color: white; text-decoration: none; border-radius: 4px; font-size: 12px;">
-                View Details
-              </a>
-            </div>
-          `);
-        });
-      } catch (error) {
-        console.error('Error loading map:', error);
-      }
-    }
-
-    // Initialize everything
-    document.addEventListener('DOMContentLoaded', function() {
-      loadSlideshowHomes();
-      
-      // Give Leaflet time to load
-      setTimeout(() => {
-        initMap();
-      }, 500);
-    });
-
-    // Smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-    });
-  </script>
-</body>
-</html>
+<html lang="en-US">
+<head itemscope itemtype="https://schema.org/WebSite">
+<meta charset="UTF-8" />
+<meta name="description" content="Bethesda&#039;s Luxury Home Builders" />
+		<meta name="robots" content="noodp,noydir" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C. M. Conlan Contractors and Builders Inc. – Bethesda&#039;s Luxury Home Builders</title>
+<link rel='dns-prefetch' href='http://fonts.googleapis.com/' />
+<link rel='dns-prefetch' href='http://s.w.org/' />
+<link rel="alternate" type="application/rss+xml" title="C. M. Conlan Contractors and Builders Inc. &raquo; Feed" href="feed/index.html" />
+<link rel="alternate" type="application/rss+xml" title="C. M. Conlan Contractors and Builders Inc. &raquo; Comments Feed" href="comments/feed/index.html" />
+<link rel="canonical" href="index.html" />
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/11\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/11\/svg\/","svgExt":".svg","source":{"concatemoji":"http:\/\/cmconlanbuilders.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.9.20"}};
+			!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){var a=String.fromCharCode;p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,e),0,0);e=i.toDataURL();return p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,t),0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(!p||!p.fillText)return!1;switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s([55356,56826,55356,56819],[55356,56826,8203,55356,56819])?!1:!s([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]);case"emoji":return!s([55358,56760,9792,65039],[55358,56760,8203,9792,65039])}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(n=t.source||{}).concatemoji?c(n.concatemoji):n.wpemoji&&n.twemoji&&(c(n.twemoji),c(n.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel='stylesheet' id='enterprise-pro-theme-css'  href='wp-content/themes/enterprise-pro/style.css%3Fver=2.1.1.css' type='text/css' media='all' />
+<link rel='stylesheet' id='contact-form-7-css'  href='wp-content/plugins/contact-form-7/includes/css/styles.css%3Fver=5.0.2.css' type='text/css' media='all' />
+<link rel='stylesheet' id='epl-css-lib-css'  href='wp-content/plugins/easy-property-listings/lib/assets/css/style-structure.css%3Fver=3.2.2.css' type='text/css' media='all' />
+<link rel='stylesheet' id='epl-style-css'  href='wp-content/plugins/easy-property-listings/lib/assets/css/style.css%3Fver=3.2.2.css' type='text/css' media='all' />
+<link rel='stylesheet' id='responsive-lightbox-swipebox-css'  href='wp-content/plugins/responsive-lightbox/assets/swipebox/css/swipebox.min.css%3Fver=2.0.4.css' type='text/css' media='all' />
+<link rel='stylesheet' id='dashicons-css'  href='wp-includes/css/dashicons.min.css%3Fver=4.9.20.css' type='text/css' media='all' />
+<link rel='stylesheet' id='google-fonts-css'  href='http://fonts.googleapis.com/css?family=Lato%3A300%2C700%2C300italic%7CTitillium+Web%3A600&amp;ver=2.1.1' type='text/css' media='all' />
+<script type='text/javascript' src='wp-includes/js/jquery/jquery.js%3Fver=1.12.4'></script>
+<script type='text/javascript' src='wp-includes/js/jquery/jquery-migrate.min.js%3Fver=1.4.1'></script>
+<script type='text/javascript' src='wp-content/plugins/easy-property-listings/lib/assets/js/epl.js%3Fver=3.2.2'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var epl_frontend_vars = {"epl_default_view_type":"list","ajaxurl":"http:\/\/cmconlanbuilders.com\/wp-admin\/admin-ajax.php"};
+/* ]]> */
+</script>
+<script type='text/javascript' src='wp-content/plugins/easy-property-listings/lib/assets/js/jquery-front-scripts.js%3Fver=3.2.2'></script>
+<script type='text/javascript' src='wp-content/plugins/responsive-lightbox/assets/swipebox/js/jquery.swipebox.min.js%3Fver=2.0.4'></script>
+<script type='text/javascript' src='wp-content/plugins/responsive-lightbox/assets/infinitescroll/infinite-scroll.pkgd.min.js%3Fver=4.9.20'></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var rlArgs = {"script":"swipebox","selector":"lightbox","customEvents":"","activeGalleries":"1","animation":"1","hideCloseButtonOnMobile":"0","removeBarsOnMobile":"0","hideBars":"1","hideBarsDelay":"5000","videoMaxWidth":"1080","useSVG":"1","loopAtEnd":"0","woocommerce_gallery":"0","ajaxurl":"http:\/\/cmconlanbuilders.com\/wp-admin\/admin-ajax.php","nonce":"8c882027a0"};
+/* ]]> */
+</script>
+<script type='text/javascript' src='wp-content/plugins/responsive-lightbox/js/front.js%3Fver=2.0.4'></script>
+<!--[if lt IE 9]>
+<script type='text/javascript' src='http://cmconlanbuilders.com/wp-content/themes/genesis/lib/js/html5shiv.min.js?ver=3.7.3'></script>
+<![endif]-->
+<script type='text/javascript' src='wp-content/themes/enterprise-pro/js/responsive-menu.js%3Fver=1.0.0'></script>
+<link rel='https://api.w.org/' href='wp-json/index.html' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://cmconlanbuilders.com/xmlrpc.php?rsd" />
+<link rel="alternate" type="application/json+oembed" href="wp-json/oembed/1.0/embed%3Furl=http:%252F%252Fcmconlanbuilders.com%252F" />
+<link rel="alternate" type="text/xml+oembed" href="wp-json/oembed/1.0/embed%3Furl=http:%252F%252Fcmconlanbuilders.com%252F&amp;format=xml" />
+<link rel="pingback" href="http://cmconlanbuilders.com/xmlrpc.php" />
+<meta itemprop="name" content="C. M. Conlan Contractors and Builders Inc." />
+<meta itemprop="url" content="http://cmconlanbuilders.com/" />
+<style type="text/css">.site-title a { background: url(wp-content/uploads/cropped-conlan_transparent_long.png) no-repeat !important; }</style>
+<link rel="icon" href="wp-content/uploads/cropped-baskerville-c-1-32x32.jpg" sizes="32x32" />
+<link rel="icon" href="wp-content/uploads/cropped-baskerville-c-1-192x192.jpg" sizes="192x192" />
+<link rel="apple-touch-icon-precomposed" href="wp-content/uploads/cropped-baskerville-c-1-180x180.jpg" />
+<meta name="msapplication-TileImage" content="http://cmconlanbuilders.com/wp-content/uploads/cropped-baskerville-c-1-270x270.jpg" />
+		<style type="text/css" id="wp-custom-css">
+			/*
+You can add your own CSS here.
+
+Click the help icon above to learn more.
+*/
+
+
+div.epl-widget div.epl-blog-image img
+{
+    display: block;
+    margin: 0 auto;
+	width: 358px;
+}
+
+
+div.epl-widget div.epl-blog-image
+{
+	border-top: solid #777 1px;
+	border-bottom: none;
+	padding: 0px 0px 0px 0px;
+	overflow: hidden;
+}
+
+div.epl-widget div.entry-header
+{
+	border-bottom: none;
+}
+
+
+div.epl-widget div.property-meta.price
+{
+	padding: 0px 0px 20px 0px;
+}
+
+
+/*
+You can add your own CSS here.
+
+Click the help icon above to learn more.
+*/
+
+/* Content Boxes
+------------------------------------------------------------ */
+ 
+.content-box-blue,
+.content-box-gray,
+.content-box-green,
+.content-box-purple,
+.content-box-red,
+.content-box-yellow {
+	color: #111;
+    margin: 0 0 25px;
+    overflow: hidden;
+    padding: 20px;
+}
+ 
+.content-box-blue {
+    background-color: #d8ecf7;
+    border: 1px solid #afcde3;
+}
+ 
+.content-box-gray {
+    background-color: #e2e2e2;
+    border: 1px solid #bdbdbd;
+}
+ 
+.content-box-green {
+    background-color: #d9edc2;
+    border: 1px solid #b2ce96;
+}
+ 
+.content-box-purple {
+    background-color: #e2e2f9;
+    border: 1px solid #bebde9;
+}
+ 
+.content-box-red {
+    background-color: #f9dbdb;
+    border: 1px solid #e9b3b3;
+}
+ 
+.content-box-yellow {
+    background-color: #fef5c4;
+    border: 1px solid #fadf98;
+}
+
+
+
+div.entry-content > p {
+	color: #111
+}
+
+div.entry-content > ul {
+	color: #222
+}
+
+div.entry-content > ol {
+	color: #222
+}
+
+div.comment-content > p {
+	color: #333
+}
+
+div.entry-content > blockquote {
+	color: #222
+}
+
+p.comment-form-comment > textarea {
+	color: #222
+}
+
+
+div.entry-content > div[role=form] > form *:not([type='submit'])  {
+	color: #222
+}
+
+div.textwidget {
+	color: #222;
+}
+
+		</style>
+	</head>
+<body class="home page-template-default page page-id-2 custom-header header-image full-width-content enterprise-pro-home" itemscope itemtype="https://schema.org/WebPage"><div class="site-container"><header class="site-header" itemscope itemtype="https://schema.org/WPHeader"><div class="wrap"><div class="title-area"><p class="site-title" itemprop="headline"><a href="index.html">C. M. Conlan Contractors and Builders Inc.</a></p><p class="site-description" itemprop="description">Bethesda&#039;s Luxury Home Builders</p></div><div class="widget-area header-widget-area"><section id="nav_menu-3" class="widget widget_nav_menu"><div class="widget-wrap"><nav class="nav-header" itemscope itemtype="https://schema.org/SiteNavigationElement"><ul id="menu-header-menu-1" class="menu genesis-nav-menu"><li id="menu-item-209" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-209"><a href="about/index.html" itemprop="url"><span itemprop="name">About</span></a></li>
+<li id="menu-item-212" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-212"><a href="our-homes/index.html" itemprop="url"><span itemprop="name">Our Homes</span></a></li>
+<li id="menu-item-210" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-210"><a href="footprint/index.html" itemprop="url"><span itemprop="name">Footprint</span></a></li>
+<li id="menu-item-378" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-378"><a href="careers/index.html" itemprop="url"><span itemprop="name">Careers</span></a></li>
+<li id="menu-item-657" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-657"><a href="contact/index.html" itemprop="url"><span itemprop="name"><button>Contact Us</button></span></a></li>
+</ul></nav></div></section>
+</div></div></header><div class="home-top widget-area"><div class="wrap"><section id="featured-page-4" class="widget featured-content featuredpage"><div class="widget-wrap"><article class="post-188 page type-page status-publish entry"><a href="about/index.html" class="alignleft" aria-hidden="true"><img width="750" height="597" src="wp-content/uploads/cmconlan.png" class="entry-image attachment-page" alt="About" itemprop="image" srcset="wp-content/uploads/cmconlan.png 1013w, wp-content/uploads/cmconlan-300x239.png 300w" sizes="(max-width: 750px) 100vw, 750px" /></a><header class="entry-header"><h2 class="entry-title" itemprop="headline"><a href="about/index.html">About</a></h2></header><div class="entry-content"><p>Meet Chris Conlan, the head of C. M. Conlan Contractors and Builders, a company he founded in 1989. With over 30 years of experience as a residential home builder and a background in real estate, Chris has developed a reputation for his expert craftsmanship, close attention to detail, and exceptional strength in design. He is an award-winning builder recognized by the Montgomery County Builder’s Association and has b &#x02026; <a href="about/index.html" class="more-link">Read more...</a></p></div></article></div></section>
+</div></div><div class="site-inner"><div class="wrap"><div class="content-sidebar-wrap"><main class="content"></main></div></div></div><footer class="site-footer" itemscope itemtype="https://schema.org/WPFooter"><div class="wrap"><p>Copyright &#x000A9;&nbsp;2025 &#x000B7; <a href="http://my.studiopress.com/themes/enterprise/">Enterprise Pro Theme</a> on <a href="https://www.studiopress.com/">Genesis Framework</a> &#x000B7; <a href="https://wordpress.org/">WordPress</a> &#x000B7; <a href="wp-login.php.html">Log in</a></p></div></footer></div><script type='text/javascript'>
+/* <![CDATA[ */
+var wpcf7 = {"apiSettings":{"root":"http:\/\/cmconlanbuilders.com\/wp-json\/contact-form-7\/v1","namespace":"contact-form-7\/v1"},"recaptcha":{"messages":{"empty":"Please verify that you are not a robot."}}};
+/* ]]> */
+</script>
+<script type='text/javascript' src='wp-content/plugins/contact-form-7/includes/js/scripts.js%3Fver=5.0.2'></script>
+<script type='text/javascript' src='wp-includes/js/wp-embed.min.js%3Fver=4.9.20'></script>
+</body></html>
