@@ -3,26 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CMConlan Builders | Custom Home Builder in Montgomery County, MD</title>
+  <title>C. M. Conlan Contractors & Builders | Custom Home Builder in Montgomery County, MD</title>
   <meta name="description" content="Award-winning custom home builder and general contractor in Montgomery County, Maryland with over 35 years of experience in residential construction and renovations." />
-  <link rel="icon" type="image/png" href="conlanlogo.png" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
+  <!-- Leaflet CSS for Interactive Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
   <style>
     :root {
-      --primary-dark: #1a2332;
-      --primary-navy: #2c4056;
-      --accent-gold: #c19a5b;
-      --accent-warm: #8b7355;
+      --primary-dark: #1f3347;
+      --accent-gold: #b8935f;
       --text-dark: #2d2d2d;
       --text-light: #666666;
       --bg-cream: #f8f6f3;
       --bg-white: #ffffff;
-      --border-light: #e5e5e5;
     }
 
     * {
@@ -51,14 +50,9 @@
       top: 0;
       left: 0;
       right: 0;
-      background: var(--bg-white);
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       z-index: 1000;
-      transition: all 0.3s ease;
-    }
-
-    .header.scrolled {
-      box-shadow: 0 2px 30px rgba(0, 0, 0, 0.12);
     }
 
     .nav-container {
@@ -67,23 +61,22 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.2rem 4rem;
+      padding: 1rem 3rem;
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
       font-family: "Cormorant Garamond", serif;
-      font-size: 1.8rem;
-      font-weight: 700;
+      font-size: 1.5rem;
+      font-weight: 600;
       color: var(--primary-dark);
       text-decoration: none;
-      letter-spacing: 0.5px;
     }
 
     .logo-image {
-      height: 50px;
+      height: 45px;
       width: auto;
     }
 
@@ -99,75 +92,18 @@
       text-decoration: none;
       font-size: 0.95rem;
       font-weight: 500;
-      letter-spacing: 0.3px;
       transition: color 0.3s ease;
-      position: relative;
     }
 
     .nav-menu a:hover {
       color: var(--accent-gold);
     }
 
-    .nav-menu a::after {
-      content: "";
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--accent-gold);
-      transition: width 0.3s ease;
-    }
-
-    .nav-menu a:hover::after {
-      width: 100%;
-    }
-
-    .dropdown {
-      position: relative;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: white;
-      min-width: 220px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      padding: 1rem 0;
-      margin-top: 1rem;
-      border-radius: 4px;
-    }
-
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-
-    .dropdown-content a {
-      display: block;
-      padding: 0.8rem 1.5rem;
-      font-size: 0.9rem;
-    }
-
-    .dropdown-content a::after {
-      display: none;
-    }
-
-    .dropdown-content a:hover {
-      background: var(--bg-cream);
-    }
-
     .mobile-menu-btn {
       display: none;
-      background: none;
-      border: none;
-      font-size: 1.8rem;
-      cursor: pointer;
-      color: var(--primary-dark);
     }
 
-    /* Hero Section (slideshow background) */
+    /* Hero Section - Full Screen Slideshow */
     .hero {
       height: 100vh;
       display: flex;
@@ -176,52 +112,66 @@
       text-align: center;
       color: white;
       position: relative;
-      margin-top: 80px;
+      margin-top: 70px;
       overflow: hidden;
     }
 
-    /* Two stacked background layers for crossfade */
     .hero-bg {
       position: absolute;
       inset: 0;
       background-size: cover;
       background-position: center;
-      transform: scale(1.03);
       transition: opacity 1.2s ease-in-out;
-      z-index: 0;
       opacity: 0;
+      z-index: 0;
     }
 
-    /* Overlay to keep text readable */
+    .hero-bg.active {
+      opacity: 1;
+      z-index: 1;
+    }
+
     .hero-bg::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: rgba(26, 35, 50, 0.5);
+      background: rgba(31, 51, 71, 0.45);
+      pointer-events: none;
     }
 
     .hero-content {
       max-width: 900px;
       padding: 2rem;
-      animation: fadeInUp 1s ease-out;
       position: relative;
-      z-index: 1;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hero-content .btn {
+      pointer-events: auto;
     }
 
     .hero h1 {
-      font-size: 4.5rem;
+      font-size: 4rem;
       color: white;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       font-weight: 400;
-      letter-spacing: 1px;
     }
 
     .hero-subtitle {
-      font-size: 1.4rem;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.95;
+    }
+
+    .hero-location {
+      font-size: 1.1rem;
       margin-bottom: 2.5rem;
       font-weight: 300;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      opacity: 0.9;
     }
 
     .btn {
@@ -231,17 +181,15 @@
       color: white;
       text-decoration: none;
       font-weight: 500;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       transition: all 0.3s ease;
-      border: 2px solid var(--accent-gold);
       text-transform: uppercase;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .btn:hover {
-      background: transparent;
+      background: #9a7749;
       transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(193, 154, 91, 0.3);
     }
 
     .btn-outline {
@@ -255,48 +203,137 @@
       color: var(--primary-dark);
     }
 
-    /* Introduction Section */
-    .intro-section {
-      padding: 8rem 4rem;
-      background: var(--bg-white);
+    /* Navigation Dots & Arrows */
+    .hero-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.25);
+      border: none;
+      color: white;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 20;
+      transition: background 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-nav:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .hero-nav.prev {
+      left: 20px;
+    }
+
+    .hero-nav.next {
+      right: 20px;
+    }
+
+    .hero-dots {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 20;
+    }
+
+    .hero-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .hero-dot.active {
+      background: white;
+      width: 30px;
+      border-radius: 5px;
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 8rem 3rem 5rem;
+      background: white;
+      overflow: hidden;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
+      overflow: hidden;
     }
 
     .two-column {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5rem;
-      align-items: start; /* aligns image top with heading */
+      grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+      gap: 6rem;
+      align-items: start;
+      max-width: 100%;
+      overflow: hidden;
     }
 
-    .intro-image {
+    /* FIX: Prevent grid children from overflowing */
+    .two-column > * {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .about-content {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      overflow: hidden;
+    }
+
+    .about-image-wrapper {
+      position: relative;
+    }
+
+    .about-image-wrapper::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent-gold);
+    }
+
+    .about-image {
       width: 100%;
       height: 600px;
       object-fit: cover;
-      box-shadow: 20px 20px 0 var(--accent-gold);
     }
 
-    .intro-content h2 {
+    .about-content h2 {
       font-size: 3.5rem;
       margin-bottom: 2rem;
-      line-height: 1.1;
-      margin-top: 0;
     }
 
-    .intro-content p {
-      font-size: 1.1rem;
+    .about-content p {
+      font-size: 1.05rem;
       color: var(--text-light);
       margin-bottom: 1.5rem;
       line-height: 1.8;
+      max-width: 100%;
     }
 
-    /* Testimonials Section */
-    .testimonials-section {
-      padding: 8rem 4rem;
+    .about-content strong {
+      color: var(--text-dark);
+      font-weight: 600;
+    }
+
+    /* Gallery Section */
+    .gallery-section {
+      padding: 5rem 3rem 5rem;
       background: var(--bg-cream);
     }
 
@@ -306,59 +343,18 @@
       margin-bottom: 4rem;
     }
 
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 3rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .testimonial-card {
-      background: white;
-      padding: 3rem;
-      border-left: 4px solid var(--accent-gold);
-      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s ease;
-    }
-
-    .testimonial-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .testimonial-text {
-      font-size: 1.05rem;
-      line-height: 1.8;
-      color: var(--text-light);
-      margin-bottom: 2rem;
-      font-style: italic;
-    }
-
-    .testimonial-author {
-      font-weight: 600;
-      color: var(--primary-dark);
-      font-size: 1.1rem;
-    }
-
-    /* Gallery Preview Section */
-    .gallery-section {
-      padding: 8rem 4rem;
-      background: var(--bg-white);
-    }
-
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 2rem;
       max-width: 1400px;
-      margin: 3rem auto 0;
+      margin: 0 auto 3rem;
     }
 
     .gallery-item {
       position: relative;
       overflow: hidden;
       height: 400px;
-      cursor: pointer;
     }
 
     .gallery-item img {
@@ -369,30 +365,86 @@
     }
 
     .gallery-item:hover img {
-      transform: scale(1.1);
+      transform: scale(1.08);
     }
 
-    .gallery-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(26, 35, 50, 0.9));
-      padding: 2rem;
-      color: white;
-      transform: translateY(100%);
+    .gallery-cta {
+      text-align: center;
+    }
+
+    /* Map Section */
+    .map-section {
+      padding: 5rem 3rem 8rem;
+      background: white;
+    }
+
+    .map-intro {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .map-intro p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      max-width: 700px;
+      margin: 1rem auto 0;
+    }
+
+    #map {
+      height: 450px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Testimonials Section - 3 in a row */
+    .testimonials-section {
+      padding: 8rem 3rem;
+      background: var(--bg-cream);
+    }
+
+    .testimonials-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .testimonial-card {
+      background: white;
+      padding: 3rem 2.5rem;
+      border-left: 3px solid var(--accent-gold);
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
       transition: transform 0.3s ease;
     }
 
-    .gallery-item:hover .gallery-overlay {
-      transform: translateY(0);
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .testimonial-text {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--text-light);
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      font-weight: 600;
+      color: var(--primary-dark);
+      font-size: 1rem;
+      font-style: normal;
     }
 
     /* Footer */
     .footer {
       background: var(--primary-dark);
       color: white;
-      padding: 4rem 4rem 2rem;
+      padding: 4rem 3rem 2rem;
     }
 
     .footer-content {
@@ -406,22 +458,29 @@
     .footer h3 {
       color: var(--accent-gold);
       margin-bottom: 1.5rem;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
 
     .footer p, .footer a {
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.85);
       text-decoration: none;
-      line-height: 2;
+      line-height: 1.8;
+      font-size: 0.95rem;
     }
 
     .footer a:hover {
       color: var(--accent-gold);
     }
 
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
     .social-icons {
       display: flex;
-      gap: 1.5rem;
+      gap: 1rem;
       margin-top: 1rem;
     }
 
@@ -434,6 +493,7 @@
       justify-content: center;
       border-radius: 50%;
       transition: all 0.3s ease;
+      font-size: 0.9rem;
     }
 
     .social-icons a:hover {
@@ -446,61 +506,88 @@
       padding-top: 2rem;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
     }
 
-    /* Animations */
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* Coming Soon Popup */
+    .coming-soon-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      padding: 2rem 3rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
     }
 
-    /* Responsive Design */
+    .coming-soon-popup.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .coming-soon-popup h4 {
+      color: var(--primary-dark);
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .coming-soon-popup p {
+      color: var(--text-light);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .coming-soon-popup button {
+      background: var(--accent-gold);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background 0.3s ease;
+    }
+
+    .coming-soon-popup button:hover {
+      background: #9a7749;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .popup-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Responsive */
     @media (max-width: 1024px) {
-      .nav-container { padding: 1rem 2rem; }
       .gallery-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 768px) {
-      .mobile-menu-btn { display: block; }
-
-      .nav-menu {
-        position: fixed;
-        top: 80px;
-        left: -100%;
-        width: 100%;
-        height: calc(100vh - 80px);
-        background: white;
-        flex-direction: column;
-        padding: 2rem;
-        transition: left 0.3s ease;
-        align-items: flex-start;
-      }
-
-      .nav-menu.active { left: 0; }
-
-      .hero h1 { font-size: 2.5rem; }
-      .hero-subtitle { font-size: 1rem; }
-
-      .two-column {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-      }
-
-      .intro-image { height: 400px; }
-      .intro-content h2 { font-size: 2.5rem; }
-
-      .testimonials-grid { grid-template-columns: 1fr; }
+      .two-column { grid-template-columns: 1fr; }
+      .testimonials-row { grid-template-columns: 1fr; }
       .gallery-grid { grid-template-columns: 1fr; }
-
-      .footer-content {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      .btn-outline {
-        margin-left: 0;
-        margin-top: 1rem;
-      }
+      #map { height: 400px; }
+      .footer-content { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2.5rem; }
+      .section-title { font-size: 2.5rem; }
     }
   </style>
 </head>
@@ -508,153 +595,126 @@
   <!-- Header Navigation -->
   <header class="header">
     <div class="nav-container">
-      <a href="#" class="logo">
+      <a href="/" class="logo">
         <img src="conlanlogo.png" alt="C. M. Conlan Logo" class="logo-image" />
-        <span>C. M. Conlan Contractors &amp; Builders</span>
+        <span>C. M. Conlan Contractors & Builders</span>
       </a>
-      <button class="mobile-menu-btn" onclick="toggleMenu()">â˜°</button>
       <nav>
-        <ul class="nav-menu" id="navMenu">
-          <li><a href="#home">Home</a></li>
+        <ul class="nav-menu">
+          <li><a href="/">Home</a></li>
           <li><a href="#gallery">Photo Gallery</a></li>
-          <li><a href="#portfolio">Available Homes</a></li>
-          <li class="dropdown">
-            <a href="#about">About</a>
-            <div class="dropdown-content">
-              <a href="#awards">Awards</a>
-              <a href="#certifications">Licenses &amp; Certifications</a>
-              <a href="#testimonials">Our Clients</a>
-            </div>
-          </li>
+          <li><a href="/our-homes">Our Homes</a></li>
+          <li><a href="/coming-soon">Coming Soon</a></li>
+          <li><a href="#about">About</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <!-- Hero Section -->
+  <!-- Hero Section - Clickable Slideshow -->
   <section class="hero" id="home">
-    <div class="hero-bg hero-bg-a"></div>
-    <div class="hero-bg hero-bg-b"></div>
+    <button class="hero-nav prev" onclick="navigateSlide(-1)">‹</button>
+    <button class="hero-nav next" onclick="navigateSlide(1)">›</button>
 
     <div class="hero-content">
       <h1>Building and Renovating Fine Homes</h1>
       <p class="hero-subtitle">Expert Craftsmanship, Built to Last</p>
-      <p style="font-size: 1.1rem; margin-bottom: 2rem; font-weight: 300;">In Montgomery County, MD and the Greater Washington, D.C. Area</p>
+      <p class="hero-location">In Montgomery County, MD and the Greater Washington, D.C. Area</p>
       <a href="#about" class="btn">About Us</a>
       <a href="#gallery" class="btn btn-outline">View Our Work</a>
     </div>
+
+    <div class="hero-dots" id="heroDots"></div>
   </section>
 
-  <!-- Introduction Section -->
-  <section class="intro-section" id="about">
+  <!-- About Section -->
+  <section class="about-section" id="about">
     <div class="container">
       <div class="two-column">
-        <img src="chris-conlan-headshot.png" alt="Chris Conlan - Award-Winning Custom Home Builder" class="intro-image" />
-        <div class="intro-content">
+        <div class="about-image-wrapper">
+          <img src="chrisconlanheadshot.png" alt="Chris Conlan" class="about-image" />
+        </div>
+        <div class="about-content">
           <h2>Meet Chris Conlan</h2>
-          <p><strong>C. M. Conlan Contractors and Builders</strong> is a Bethesda-based firm well-known for its expertise in custom home construction and renovations throughout Montgomery County, Marylandâ€”including Chevy Chase, Potomac, Rockville, and surrounding areas.</p>
+          <p><strong>C. M. Conlan Contractors and Builders</strong> is a Bethesda-based firm well-known for its expertise in custom home construction and renovations throughout Montgomery County, Maryland—including Chevy Chase, Potomac, Rockville, and surrounding areas.</p>
           <p>Founded in 1989 by Chris Conlan, our company has developed a reputation for expert craftsmanship, close attention to detail, and exceptional strength in design. With over 35 years of experience as a residential home builder and a background in real estate, Chris is an award-winning builder recognized by the Montgomery County Builder's Association and has been featured in Bethesda Magazine as one of the area's top builders.</p>
-          <p>We specialize in creating custom homes tailored to each family's specific needsâ€”whether on a lot we help you find, a lot you currently own, or one of our available lots. We also offer expert renovations and additions for homeowners looking to upgrade. At C. M. Conlan, we believe in developing strong relationships between builder and client. You can depend on Chris to work closely with you throughout the entire process, remaining active and accessible from start to finish.</p>
-          <p>Our company is also a proud supporter of <strong>Rebuilding Together Montgomery County</strong>, a local nonprofit that provides renovations and housing support for underprivileged families. Chris has served as an active board member, led multiple home renovation projects, and participated in the RTMC Playhouse Projectâ€”giving the gift of home to those in need.</p>
-          <a href="#portfolio" class="btn" style="margin-top: 1rem;">Browse Our Projects</a>
+          <p>We specialize in creating custom homes tailored to each family's specific needs—whether on a lot we help you find, a lot you currently own, or one of our available lots. We also offer expert renovations and additions for homeowners looking to upgrade. At C. M. Conlan, we believe in developing strong relationships between builder and client. You can depend on Chris to work closely with you throughout the entire process, remaining active and accessible from start to finish.</p>
         </div>
       </div>
     </div>
   </section>
 
-  
-
-<!-- Gallery Preview Section -->
+  <!-- Gallery Section -->
   <section class="gallery-section" id="gallery">
     <div class="container">
       <h2 class="section-title">Our Recent Work</h2>
       <div class="gallery-grid">
         <div class="gallery-item">
-          <img src="home_1.jpg" alt="Modern Custom Home" />
-          <div class="gallery-overlay">
-            <h3>Modern Custom Home</h3>
-            <p>Montgomery County, MD</p>
-          </div>
+          <img src="home_1.jpg" alt="Custom Home" />
         </div>
         <div class="gallery-item">
-          <img src="home_2.jpg" alt="Elegant Custom Home" />
-          <div class="gallery-overlay">
-            <h3>Elegant Custom Home</h3>
-            <p>Bethesda, MD</p>
-          </div>
+          <img src="home_2.jpg" alt="Custom Home" />
         </div>
         <div class="gallery-item">
-          <img src="home_3.jpg" alt="Coastal Style Home" />
-          <div class="gallery-overlay">
-            <h3>Coastal Style Home</h3>
-            <p>Montgomery County, MD</p>
-          </div>
+          <img src="home_3.jpg" alt="Custom Home" />
         </div>
         <div class="gallery-item">
-          <img src="home_4.jpg" alt="Craftsman Style Home" />
-          <div class="gallery-overlay">
-            <h3>Craftsman Style Home</h3>
-            <p>Chevy Chase, MD</p>
-          </div>
+          <img src="home_4.jpg" alt="Custom Home" />
         </div>
         <div class="gallery-item">
-          <img src="home_5.jpg" alt="Traditional Custom Home" />
-          <div class="gallery-overlay">
-            <h3>Traditional Custom Home</h3>
-            <p>Potomac, MD</p>
-          </div>
+          <img src="home_5.jpg" alt="Custom Home" />
         </div>
         <div class="gallery-item">
-          <img src="home_7.jpg" alt="Luxury Custom Home" />
-          <div class="gallery-overlay">
-            <h3>Luxury Custom Home</h3>
-            <p>Rockville, MD</p>
-          </div>
+          <img src="home_7.jpg" alt="Custom Home" />
         </div>
-</div>
-
-      <div style="text-align: center; margin-top: 3rem;">
-        <a href="#portfolio" class="btn">View Full Gallery</a>
+      </div>
+      <div class="gallery-cta">
+        <a href="/our-homes" class="btn">View Full Gallery</a>
       </div>
     </div>
   </section>
 
-<!-- Testimonials Section -->
+  <!-- Service Area Map -->
+  <section class="map-section" id="service-area">
+    <div class="container">
+      <div class="map-intro">
+        <h2 class="section-title">Our Footprint</h2>
+        <p>Explore our footprint across Montgomery County, Maryland. Each pin represents a custom home we've built with pride.</p>
+      </div>
+      <div id="map"></div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
   <section class="testimonials-section" id="testimonials">
     <div class="container">
       <h2 class="section-title">What Our Clients Say</h2>
-      <div class="testimonials-grid">
+      <div class="testimonials-row">
         <div class="testimonial-card">
-          <p class="testimonial-text">"As a home builder myself, I appreciated the high quality and terrific service we received when Chris and his team built our custom home. They made it easy for us, from helping to design what we wanted to the final turnover. Everyone had a positive can-do attitude and was good to work with."</p>
-          <p class="testimonial-author">â€” Terry Eakin</p>
+          <p class="testimonial-text">"From our first meeting, Chris made us feel like we were his only clients. He guided us through every decision with patience and expertise, and the finished home exceeded our wildest expectations. Five years later, we still get compliments from everyone who visits."</p>
+          <p class="testimonial-author">— The Andersons</p>
         </div>
         <div class="testimonial-card">
           <p class="testimonial-text">"Chris's personal attention, focus on detail, customer orientation, high quality standards, and creativity in solving tough issues are unmatched. I can't imagine building a house with anyone else. Highly recommended!"</p>
-          <p class="testimonial-author">â€” Harris Family</p>
+          <p class="testimonial-author">— Harris Family</p>
         </div>
         <div class="testimonial-card">
           <p class="testimonial-text">"We bought our beautiful new home from C. M. Conlan and it still wows us years later. Every system has worked perfectly, and I am not easy to please. The craftsmanship is honestly perfection."</p>
-          <p class="testimonial-author">â€” The Jacobs</p>
-        </div>
-        <div class="testimonial-card">
-          <p class="testimonial-text">"C. M. Conlan is an extraordinary builder with generations of building experience. Their expertise in custom building homes is evident from their many awards and the ease with which they guide clients through the building process."</p>
-          <p class="testimonial-author">â€” Martin Family</p>
+          <p class="testimonial-author">— The Jacobs</p>
         </div>
       </div>
     </div>
   </section>
-
-
 
   <!-- Footer -->
   <footer class="footer" id="contact">
     <div class="container">
       <div class="footer-content">
         <div>
-          <h3>C. M. Conlan Contractors &amp; Builders</h3>
+          <h3>C. M. Conlan Contractors & Builders</h3>
           <p>Building exceptional homes and lasting relationships in Montgomery County since 1989</p>
-          <p style="margin-top: 2rem;">Â© 2026 C. M. Conlan Contractors &amp; Builders<br />All Rights Reserved</p>
+          <p style="margin-top: 2rem;">© 2026 C. M. Conlan Contractors & Builders<br />All Rights Reserved</p>
         </div>
 
         <div>
@@ -668,13 +728,15 @@
         <div>
           <h3>Connect With Us</h3>
           <div class="social-icons">
-            <a href="#" aria-label="Facebook">f</a>
-            <a href="#" aria-label="Instagram">ðŸ“·</a>
-            <a href="#" aria-label="LinkedIn">in</a>
-            <a href="#" aria-label="Houzz">H</a>
+            <a href="#" aria-label="Facebook" onclick="showComingSoon(event)">f</a>
+            <a href="#" aria-label="Instagram" onclick="showComingSoon(event)">📷</a>
+            <a href="#" aria-label="LinkedIn" onclick="showComingSoon(event)">in</a>
+            <a href="#" aria-label="Houzz" onclick="showComingSoon(event)">H</a>
           </div>
-          <p style="margin-top: 2rem;"><a href="#awards">Awards &amp; Certifications</a></p>
-          <p><a href="#testimonials">Client Testimonials</a></p>
+          <div class="footer-links" style="margin-top: 2rem;">
+            <a href="#" onclick="showComingSoon(event)">Awards & Certifications</a>
+            <a href="#testimonials">Client Testimonials</a>
+          </div>
         </div>
       </div>
 
@@ -684,70 +746,221 @@
     </div>
   </footer>
 
+  <!-- Coming Soon Popup -->
+  <div class="popup-overlay" id="popupOverlay" onclick="hideComingSoon()"></div>
+  <div class="coming-soon-popup" id="comingSoonPopup">
+    <h4>Coming Soon!</h4>
+    <p>This feature is currently under development.</p>
+    <button onclick="hideComingSoon()">Got It</button>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
   <script>
+    // Slideshow - Load sold homes dynamically and make them clickable
+    let soldHomes = [];
+    let currentSlideIndex = 0;
+    let heroBgsArray = [];
+
+    async function loadSlideshowHomes() {
+      try {
+        const res = await fetch('/api/get-homes');
+        if (res.ok) {
+          const data = await res.json();
+          // Filter: only Sold homes that are NOT hidden from slideshow
+          soldHomes = (data.items || []).filter(h => 
+            h.status === 'Sold' && !h.hideFromSlideshow
+          );
+        }
+      } catch (error) {
+        console.error('Error loading homes:', error);
+      }
+
+      // Fallback to static images if no sold homes
+      if (soldHomes.length === 0) {
+        soldHomes = [
+          { id: 'static1', primaryImage: 'home_1.jpg', headline: 'Custom Home 1' },
+          { id: 'static2', primaryImage: 'home_2.jpg', headline: 'Custom Home 2' },
+          { id: 'static3', primaryImage: 'home_5.jpg', headline: 'Custom Home 3' },
+          { id: 'static4', primaryImage: 'home_6.jpg', headline: 'Custom Home 4' }
+        ];
+      }
+
+      initSlideshow();
+    }
+
+    function initSlideshow() {
+      if (soldHomes.length === 0) return;
+
+      const heroSection = document.querySelector('.hero');
+      
+      soldHomes.forEach((home, index) => {
+        const bg = document.createElement('div');
+        bg.className = 'hero-bg';
+        bg.style.backgroundImage = `url('${home.primaryImage}')`;
+        bg.style.cursor = home.id.startsWith('static') ? 'default' : 'pointer';
+        bg.dataset.index = index;
+        bg.dataset.homeId = home.id;
+        
+        bg.onclick = function() {
+          if (!home.id.startsWith('static')) {
+            window.location.href = `/home-details?id=${home.id}`;
+          }
+        };
+        
+        heroSection.insertBefore(bg, heroSection.firstChild);
+        heroBgsArray.push(bg);
+      });
+
+      // Show first slide
+      if (heroBgsArray.length > 0) {
+        heroBgsArray[0].classList.add('active');
+      }
+
+      // Create dots
+      const dotsContainer = document.getElementById('heroDots');
+      dotsContainer.innerHTML = '';
+      soldHomes.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'hero-dot';
+        if (index === 0) dot.classList.add('active');
+        dot.onclick = () => goToSlide(index);
+        dotsContainer.appendChild(dot);
+      });
+
+      // Auto-advance slideshow
+      setInterval(() => {
+        navigateSlide(1);
+      }, 6000);
+    }
+
+    function navigateSlide(direction) {
+      if (heroBgsArray.length === 0) return;
+      
+      const dots = document.querySelectorAll('.hero-dot');
+      
+      heroBgsArray[currentSlideIndex].classList.remove('active');
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.remove('active');
+
+      currentSlideIndex = (currentSlideIndex + direction + soldHomes.length) % soldHomes.length;
+
+      heroBgsArray[currentSlideIndex].classList.add('active');
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
+    }
+
+    function goToSlide(index) {
+      if (heroBgsArray.length === 0) return;
+      
+      const dots = document.querySelectorAll('.hero-dot');
+      
+      heroBgsArray[currentSlideIndex].classList.remove('active');
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.remove('active');
+
+      currentSlideIndex = index;
+
+      heroBgsArray[currentSlideIndex].classList.add('active');
+      if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
+    }
+
+    // Initialize map
+    async function initMap() {
+      const mapElement = document.getElementById('map');
+      if (!mapElement) return;
+
+      // Wait for Leaflet to be fully loaded
+      if (typeof L === 'undefined') {
+        console.log('Leaflet not loaded yet, retrying...');
+        setTimeout(initMap, 200);
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/get-homes");
+        const data = await res.json();
+        const soldHomes = (data.items || []).filter(h => h.status === 'Sold' && h.latitude && h.longitude);
+
+        // Create map with a temporary view (will be overridden by fitBounds)
+        const map = L.map('map').setView([39.1434, -77.2014], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(map);
+
+        // Create a bounds object to track all marker positions
+        const bounds = L.latLngBounds();
+
+        soldHomes.forEach(home => {
+          const marker = L.marker([home.latitude, home.longitude]).addTo(map);
+          
+          // Extend bounds to include this marker
+          bounds.extend([home.latitude, home.longitude]);
+          
+          marker.bindPopup(`
+            <div style="text-align: center; min-width: 200px;">
+              <img src="${home.primaryImage}" alt="${home.headline}" 
+                   style="width: 100%; max-width: 200px; height: 120px; object-fit: cover; margin-bottom: 8px; border-radius: 4px;" />
+              <h4 style="margin: 0 0 4px; font-size: 14px;">${home.headline}</h4>
+              <p style="margin: 0 0 8px; font-size: 12px; color: #666;">${home.street || ''}</p>
+              <a href="/home-details?id=${home.id}" 
+                 style="display: inline-block; padding: 6px 12px; background: #b8935f; color: white; text-decoration: none; border-radius: 4px; font-size: 12px;">
+                View Details
+              </a>
+            </div>
+          `);
+        });
+
+        // If we have pins, fit the map to show all of them with some padding
+        if (soldHomes.length > 0) {
+          map.fitBounds(bounds, { padding: [40, 40] });
+        }
+      } catch (error) {
+        console.error('Error loading map:', error);
+      }
+    }
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSlideshowHomes();
+      
+      // Give Leaflet time to load
+      setTimeout(() => {
+        initMap();
+      }, 500);
+    });
+
     // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener("click", function (e) {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href === '#') return; // Skip if it's just "#"
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute("href"));
+        const target = document.querySelector(href);
         if (target) {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          target.scrollIntoView({ behavior: 'smooth' });
         }
       });
     });
 
-    // Header scroll effect
-    window.addEventListener("scroll", () => {
-      const header = document.querySelector(".header");
-      if (window.scrollY > 50) header.classList.add("scrolled");
-      else header.classList.remove("scrolled");
-    });
-
-    // Mobile menu toggle
-    function toggleMenu() {
-      const navMenu = document.getElementById("navMenu");
-      navMenu.classList.toggle("active");
+    // Coming Soon Popup
+    function showComingSoon(event) {
+      event.preventDefault();
+      document.getElementById('popupOverlay').classList.add('active');
+      document.getElementById('comingSoonPopup').classList.add('active');
     }
 
-    // Hero slideshow (uses your home_1.jpg ... home_7.jpg files)
-    const heroImages = [
-      "home_1.jpg",
-      "home_2.jpg",
-      "home_3.jpg",
-      "home_4.jpg",
-      "home_5.jpg",
-      "home_6.jpg"
-    ];
+    function hideComingSoon() {
+      document.getElementById('popupOverlay').classList.remove('active');
+      document.getElementById('comingSoonPopup').classList.remove('active');
+    }
 
-    const bgA = document.querySelector(".hero-bg-a");
-    const bgB = document.querySelector(".hero-bg-b");
-
-    let heroIndex = 0;
-    let showingA = true;
-
-    // Initialize first frame
-    bgA.style.backgroundImage = `url('${heroImages[0]}')`;
-    bgA.style.opacity = "1";
-
-    // Optional: preload images to reduce first-transition flicker
-    heroImages.forEach(src => { const img = new Image(); img.src = src; });
-
-    setInterval(() => {
-      heroIndex = (heroIndex + 1) % heroImages.length;
-      const nextUrl = `url('${heroImages[heroIndex]}')`;
-
-      if (showingA) {
-        bgB.style.backgroundImage = nextUrl;
-        bgB.style.opacity = "1";
-        bgA.style.opacity = "0";
-      } else {
-        bgA.style.backgroundImage = nextUrl;
-        bgA.style.opacity = "1";
-        bgB.style.opacity = "0";
+    // Close popup with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        hideComingSoon();
       }
-
-      showingA = !showingA;
-    }, 6000);
+    });
   </script>
 </body>
 </html>
