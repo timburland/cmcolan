@@ -509,6 +509,72 @@
       font-size: 0.9rem;
     }
 
+    /* Coming Soon Popup */
+    .coming-soon-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      padding: 2rem 3rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .coming-soon-popup.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .coming-soon-popup h4 {
+      color: var(--primary-dark);
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .coming-soon-popup p {
+      color: var(--text-light);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .coming-soon-popup button {
+      background: var(--accent-gold);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background 0.3s ease;
+    }
+
+    .coming-soon-popup button:hover {
+      background: #9a7749;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .popup-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .gallery-grid { grid-template-columns: repeat(2, 1fr); }
@@ -662,13 +728,13 @@
         <div>
           <h3>Connect With Us</h3>
           <div class="social-icons">
-            <a href="#" aria-label="Facebook">f</a>
-            <a href="#" aria-label="Instagram">📷</a>
-            <a href="#" aria-label="LinkedIn">in</a>
-            <a href="#" aria-label="Houzz">H</a>
+            <a href="#" aria-label="Facebook" onclick="showComingSoon(event)">f</a>
+            <a href="#" aria-label="Instagram" onclick="showComingSoon(event)">📷</a>
+            <a href="#" aria-label="LinkedIn" onclick="showComingSoon(event)">in</a>
+            <a href="#" aria-label="Houzz" onclick="showComingSoon(event)">H</a>
           </div>
           <div class="footer-links" style="margin-top: 2rem;">
-            <a href="#awards">Awards & Certifications</a>
+            <a href="#" onclick="showComingSoon(event)">Awards & Certifications</a>
             <a href="#testimonials">Client Testimonials</a>
           </div>
         </div>
@@ -679,6 +745,14 @@
       </div>
     </div>
   </footer>
+
+  <!-- Coming Soon Popup -->
+  <div class="popup-overlay" id="popupOverlay" onclick="hideComingSoon()"></div>
+  <div class="coming-soon-popup" id="comingSoonPopup">
+    <h4>Coming Soon!</h4>
+    <p>This feature is currently under development.</p>
+    <button onclick="hideComingSoon()">Got It</button>
+  </div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -844,12 +918,33 @@
     // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href === '#') return; // Skip if it's just "#"
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
+        const target = document.querySelector(href);
         if (target) {
           target.scrollIntoView({ behavior: 'smooth' });
         }
       });
+    });
+
+    // Coming Soon Popup
+    function showComingSoon(event) {
+      event.preventDefault();
+      document.getElementById('popupOverlay').classList.add('active');
+      document.getElementById('comingSoonPopup').classList.add('active');
+    }
+
+    function hideComingSoon() {
+      document.getElementById('popupOverlay').classList.remove('active');
+      document.getElementById('comingSoonPopup').classList.remove('active');
+    }
+
+    // Close popup with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        hideComingSoon();
+      }
     });
   </script>
 </body>
