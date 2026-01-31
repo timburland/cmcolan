@@ -263,28 +263,34 @@
     .about-section {
       padding: 8rem 3rem;
       background: white;
+      overflow: hidden;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
+      overflow: hidden;
     }
 
     .two-column {
       display: grid;
-      grid-template-columns: 45% 55%;
+      grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
       gap: 6rem;
       align-items: start;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     /* FIX: Prevent grid children from overflowing */
     .two-column > * {
       min-width: 0;
+      max-width: 100%;
     }
 
     .about-content {
       overflow-wrap: break-word;
       word-wrap: break-word;
+      overflow: hidden;
     }
 
     .about-image-wrapper {
@@ -317,6 +323,7 @@
       color: var(--text-light);
       margin-bottom: 1.5rem;
       line-height: 1.8;
+      max-width: 100%;
     }
 
     .about-content strong {
