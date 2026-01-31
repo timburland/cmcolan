@@ -83,6 +83,64 @@
       font-size: 0.9rem;
     }
 
+    /* Checkbox styling */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: #f8f9fa;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .checkbox-group:hover {
+      background: #e9ecef;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--accent-gold);
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      cursor: pointer;
+      font-weight: 400;
+    }
+
+    .checkbox-group small {
+      display: block;
+      color: var(--text-light);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .visibility-section {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .visibility-section h4 {
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #856404;
+    }
+
+    .visibility-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
     button {
       width: 100%;
       padding: 0.875rem;
@@ -229,6 +287,26 @@
     .home-status.for-sale { background: #d4edda; color: #155724; }
     .home-status.sold { background: #f8d7da; color: #721c24; }
     .home-status.poa { background: #d1ecf1; color: #0c5460; }
+
+    .visibility-badges {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .visibility-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: #e9ecef;
+      color: #6c757d;
+    }
+
+    .visibility-badge.hidden {
+      background: #fff3cd;
+      color: #856404;
+    }
 
     .home-actions { display: flex; gap: 0.5rem; flex-direction: column; }
     .home-actions button { width: 100px; padding: 0.5rem; font-size: 0.9rem; }
@@ -717,6 +795,27 @@
           <small>Enter one feature per line</small>
         </div>
 
+        <!-- Visibility Options -->
+        <div class="visibility-section">
+          <h4>👁️ Visibility Options</h4>
+          <div class="visibility-options">
+            <div class="checkbox-group" onclick="document.getElementById('hideFromSlideshow').click()">
+              <input type="checkbox" id="hideFromSlideshow" onclick="event.stopPropagation()">
+              <div>
+                <label for="hideFromSlideshow">Hide from Homepage Slideshow</label>
+                <small>This home won't appear in the rotating slideshow on the homepage</small>
+              </div>
+            </div>
+            <div class="checkbox-group" onclick="document.getElementById('hideFromOurHomes').click()">
+              <input type="checkbox" id="hideFromOurHomes" onclick="event.stopPropagation()">
+              <div>
+                <label for="hideFromOurHomes">Hide from "Our Homes" Page</label>
+                <small>This home won't appear on the Our Homes listing page</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div id="formMessage" style="margin-bottom: 1rem;"></div>
 
         <!-- Publishing Progress Indicator -->
@@ -832,7 +931,7 @@
 
     let primaryImageUrl = '';
     let primaryImageFilename = '';
-    let galleryImagesData = []; // Array of {url, filename}
+    let galleryImagesData = [];
     let editingId = null;
     let homes = [];
 
@@ -871,7 +970,7 @@
       location.reload();
     }
 
-    // Image Upload - Uploads to Blob Storage and gets URL
+    // Image Upload
     async function handlePrimaryImage(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -889,7 +988,6 @@
       progressBar.style.width = '0%';
       progressBar.textContent = '0%';
       
-      // Smooth progress animation
       let progress = 0;
       const progressInterval = setInterval(() => {
         if (progress < 70) {
@@ -904,12 +1002,10 @@
         reader.onload = async (e) => {
           const imageData = e.target.result;
           
-          // Set to 75% when starting upload
           clearInterval(progressInterval);
           progressBar.style.width = '75%';
           progressBar.textContent = '75%';
           
-          // Get address for folder organization
           const address = {
             street: document.getElementById('street').value.trim(),
             city: document.getElementById('city').value.trim(),
@@ -917,7 +1013,6 @@
             zip: document.getElementById('zip').value.trim()
           };
 
-          // Upload to Azure Blob Storage
           const response = await fetch('/api/upload-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -930,7 +1025,6 @@
 
           const result = await response.json();
           
-          // Complete to 100%
           progressBar.style.width = '100%';
           progressBar.textContent = '100%';
           
@@ -975,7 +1069,6 @@
       for (const file of files) {
         if (!file.type.startsWith('image/')) continue;
 
-        // Check for duplicate filename
         const existingImage = galleryImagesData.find(img => img.filename === file.name);
         if (existingImage) {
           const confirmReplace = confirm(`"${file.name}" already uploaded. Replace it?`);
@@ -987,7 +1080,6 @@
             progressBar.textContent = `${uploadedCount}/${totalFiles} photos`;
             continue;
           } else {
-            // Remove the old one
             const index = galleryImagesData.findIndex(img => img.filename === file.name);
             galleryImagesData.splice(index, 1);
           }
@@ -1000,7 +1092,6 @@
             reader.readAsDataURL(file);
           });
 
-          // Get address for folder organization
           const address = {
             street: document.getElementById('street').value.trim(),
             city: document.getElementById('city').value.trim(),
@@ -1008,7 +1099,6 @@
             zip: document.getElementById('zip').value.trim()
           };
 
-          // Upload to Azure Blob Storage
           const response = await fetch('/api/upload-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1100,12 +1190,8 @@
       }
     }
 
-    // Price formatting
     function formatPrice(input) {
-      // Remove all non-digits
       let value = input.value.replace(/[^\d]/g, '');
-      
-      // Format with commas
       if (value) {
         value = parseInt(value).toLocaleString('en-US');
         input.value = '$' + value;
@@ -1114,7 +1200,6 @@
       }
     }
 
-    // Generate headline from address if not provided
     function generateHeadline(street, city, state, zip) {
       const parts = [street, city, state, zip].filter(p => p && p.trim());
       return parts.join(', ');
@@ -1128,7 +1213,6 @@
           const data = await response.json();
           homes = data.items || [];
         } else {
-          // Fallback to localStorage
           const saved = localStorage.getItem(STORAGE_KEY);
           homes = saved ? JSON.parse(saved) : [];
         }
@@ -1142,7 +1226,6 @@
     async function saveHomes() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(homes));
       
-      // Publish to website via API
       try {
         const response = await fetch('/api/save-homes', {
           method: 'POST',
@@ -1170,36 +1253,51 @@
         return;
       }
 
-      container.innerHTML = homes.map((home, index) => `
-        <div class="home-item" draggable="true" data-id="${home.id}" data-index="${index}">
-          <div class="drag-handle" title="Drag to reorder">
-            <div class="drag-dots"></div>
-            <div class="drag-dots"></div>
-            <div class="drag-dots"></div>
-          </div>
-          <div style="position: relative;">
-            <img src="${home.primaryImage}" alt="${home.headline}">
-            <div class="home-order-badge">${index + 1}</div>
-          </div>
-          <div class="home-info">
-            <h3>${home.headline}</h3>
-            <p><strong>${home.street}</strong></p>
-            <p>${home.city}, ${home.state} ${home.zip || ''}</p>
-            <p>🛏️ ${home.bedrooms} bed | 🛁 ${home.bathrooms} bath | 🚗 ${home.parking || 0} parking</p>
-            <span class="home-status ${home.status.toLowerCase().replace(' ', '-')}">${home.status}</span>
-          </div>
-          <div class="home-actions">
-            <button onclick="editHome('${home.id}')">Edit</button>
-            <button class="danger" onclick="deleteHome('${home.id}')">Delete</button>
-          </div>
-        </div>
-      `).join('');
+      container.innerHTML = homes.map((home, index) => {
+        // Build visibility badges
+        let visibilityBadges = '';
+        if (home.hideFromSlideshow || home.hideFromOurHomes) {
+          visibilityBadges = '<div class="visibility-badges">';
+          if (home.hideFromSlideshow) {
+            visibilityBadges += '<span class="visibility-badge hidden">Hidden from Slideshow</span>';
+          }
+          if (home.hideFromOurHomes) {
+            visibilityBadges += '<span class="visibility-badge hidden">Hidden from Our Homes</span>';
+          }
+          visibilityBadges += '</div>';
+        }
 
-      // Add drag and drop event listeners
+        return `
+          <div class="home-item" draggable="true" data-id="${home.id}" data-index="${index}">
+            <div class="drag-handle" title="Drag to reorder">
+              <div class="drag-dots"></div>
+              <div class="drag-dots"></div>
+              <div class="drag-dots"></div>
+            </div>
+            <div style="position: relative;">
+              <img src="${home.primaryImage}" alt="${home.headline}">
+              <div class="home-order-badge">${index + 1}</div>
+            </div>
+            <div class="home-info">
+              <h3>${home.headline}</h3>
+              <p><strong>${home.street}</strong></p>
+              <p>${home.city}, ${home.state} ${home.zip || ''}</p>
+              <p>🛏️ ${home.bedrooms} bed | 🛁 ${home.bathrooms} bath | 🚗 ${home.parking || 0} parking</p>
+              <span class="home-status ${home.status.toLowerCase().replace(' ', '-')}">${home.status}</span>
+              ${visibilityBadges}
+            </div>
+            <div class="home-actions">
+              <button onclick="editHome('${home.id}')">Edit</button>
+              <button class="danger" onclick="deleteHome('${home.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
       initDragAndDrop();
     }
 
-    // Drag and Drop functionality
+    // Drag and Drop
     let draggedElement = null;
     let draggedIndex = null;
 
@@ -1226,17 +1324,13 @@
 
     function handleDragEnd(e) {
       this.classList.remove('dragging');
-      
-      // Remove all drag-over classes
       document.querySelectorAll('.home-item').forEach(item => {
         item.classList.remove('drag-over');
       });
     }
 
     function handleDragOver(e) {
-      if (e.preventDefault) {
-        e.preventDefault();
-      }
+      if (e.preventDefault) e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       return false;
     }
@@ -1252,24 +1346,19 @@
     }
 
     async function handleDrop(e) {
-      if (e.stopPropagation) {
-        e.stopPropagation();
-      }
+      if (e.stopPropagation) e.stopPropagation();
       
       if (draggedElement !== this) {
         const dropIndex = parseInt(this.dataset.index);
         
-        // Reorder the homes array
         const draggedHome = homes[draggedIndex];
         homes.splice(draggedIndex, 1);
         homes.splice(dropIndex, 0, draggedHome);
         
-        // Save and re-render
         try {
           await saveHomes();
           renderHomes();
           
-          // Show success message
           const message = document.createElement('div');
           message.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; animation: slideIn 0.3s ease;';
           message.textContent = '✓ Order updated! Slideshow updated too.';
@@ -1292,6 +1381,8 @@
       document.getElementById('modalTitle').textContent = 'Add New Home';
       document.getElementById('homeForm').reset();
       document.getElementById('homeId').value = '';
+      document.getElementById('hideFromSlideshow').checked = false;
+      document.getElementById('hideFromOurHomes').checked = false;
       primaryImageUrl = '';
       primaryImageFilename = '';
       galleryImagesData = [];
@@ -1323,11 +1414,14 @@
       document.getElementById('status').value = home.status;
       document.getElementById('price').value = home.price || '';
       document.getElementById('features').value = (home.features || []).join('\n');
+      
+      // Set visibility checkboxes
+      document.getElementById('hideFromSlideshow').checked = home.hideFromSlideshow || false;
+      document.getElementById('hideFromOurHomes').checked = home.hideFromOurHomes || false;
 
       primaryImageUrl = home.primaryImage;
-      primaryImageFilename = 'existing-image.jpg'; // For existing images
+      primaryImageFilename = 'existing-image.jpg';
       
-      // Convert gallery URLs to data structure with placeholder filenames
       galleryImagesData = (home.additionalImages || []).map((url, index) => ({
         url: url,
         filename: `existing-${index + 1}.jpg`
@@ -1336,7 +1430,6 @@
       displayPrimaryPreview(primaryImageUrl, primaryImageFilename);
       displayGalleryPreview();
       
-      // Show completion indicators if images exist
       if (primaryImageUrl) {
         document.getElementById('primaryComplete').style.display = 'flex';
       }
@@ -1346,7 +1439,6 @@
       }
       
       document.getElementById('formMessage').style.display = 'none';
-
       document.getElementById('homeModal').classList.add('active');
     }
 
@@ -1381,18 +1473,15 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Publishing...';
 
-      // Show publishing progress
       const progressContainer = document.getElementById('publishingProgress');
       progressContainer.classList.add('active');
       
-      // Reset all steps
       document.getElementById('step1').classList.remove('active', 'complete');
       document.getElementById('step2').classList.remove('active', 'complete');
       document.getElementById('step3').classList.remove('active', 'complete');
       document.getElementById('finalSuccess').classList.remove('active');
 
       try {
-        // Step 1: Prepare data
         document.getElementById('step1').classList.add('active');
         await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -1401,20 +1490,16 @@
         const state = document.getElementById('state').value;
         const zip = document.getElementById('zip').value;
         
-        // Use provided headline or generate from address
         let headline = document.getElementById('headline').value.trim();
         if (!headline) {
           headline = generateHeadline(street, city, state, zip);
         }
         
-        // Use provided description or empty string
         const description = document.getElementById('description').value.trim() || '';
         
-        // Format price - remove $ and commas for storage
         let price = document.getElementById('price').value;
         if (price) {
           price = price.replace(/[$,]/g, '');
-          // Re-format for display
           price = '$' + parseInt(price).toLocaleString('en-US');
         }
 
@@ -1438,11 +1523,13 @@
             .split('\n')
             .map(f => f.trim())
             .filter(f => f),
+          hideFromSlideshow: document.getElementById('hideFromSlideshow').checked,
+          hideFromOurHomes: document.getElementById('hideFromOurHomes').checked,
           ctaLabel: document.getElementById('status').value === 'Sold' ? 'View Details' : 'Schedule Viewing',
           ctaUrl: `home-details.html?id=${document.getElementById('homeId').value || generateId()}`
         };
 
-        // Try to geocode the address and store coordinates
+        // Try to geocode
         const fullAddress = `${street}, ${city}, ${state} ${zip}`.trim();
         try {
           const geocodeResponse = await fetch('/api/geocode-address', {
@@ -1456,18 +1543,15 @@
             if (geocodeData.success) {
               formData.latitude = geocodeData.lat;
               formData.longitude = geocodeData.lon;
-              console.log(`✓ Geocoded: [${geocodeData.lat}, ${geocodeData.lon}]`);
             }
           }
         } catch (error) {
           console.warn('Could not geocode address:', error);
-          // Continue without coordinates - not critical
         }
 
         document.getElementById('step1').classList.remove('active');
         document.getElementById('step1').classList.add('complete');
 
-        // Step 2: Save to local storage
         document.getElementById('step2').classList.add('active');
         await new Promise(resolve => setTimeout(resolve, 300));
 
@@ -1481,7 +1565,6 @@
         document.getElementById('step2').classList.remove('active');
         document.getElementById('step2').classList.add('complete');
 
-        // Step 3: Publish to website
         document.getElementById('step3').classList.add('active');
         
         const result = await saveHomes();
@@ -1492,7 +1575,6 @@
         document.getElementById('step3').classList.remove('active');
         document.getElementById('step3').classList.add('complete');
         
-        // Show final success
         document.getElementById('finalSuccess').classList.add('active');
         
         setTimeout(() => {
@@ -1548,7 +1630,6 @@
       const errorDiv = document.getElementById('importError');
       const smartPasteSection = document.getElementById('smartPasteSection');
 
-      // Reset UI
       errorDiv.style.display = 'none';
       smartPasteSection.style.display = 'none';
       progressDiv.style.display = 'block';
@@ -1559,7 +1640,6 @@
       statusText.textContent = 'Fetching listing data...';
 
       try {
-        // Step 1: Parse the listing
         const response = await fetch('/api/parse-zillow', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1583,14 +1663,12 @@
         statusText.textContent = `Found: ${listingData.headline}`;
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Step 2: Download and upload images
         progressBar.style.width = '60%';
         statusText.textContent = `Uploading ${listingData.images.length} photos...`;
 
         const uploadedImages = [];
-        let primaryImageUrl = '';
+        let primaryImageUrlImport = '';
 
-        // Get address for folder organization
         const address = {
           street: listingData.street,
           city: listingData.city,
@@ -1602,18 +1680,15 @@
           try {
             const imageUrl = listingData.images[i];
             
-            // Fetch image as blob
             const imageResponse = await fetch(imageUrl);
             const imageBlob = await imageResponse.blob();
             
-            // Convert to base64
             const reader = new FileReader();
             const imageData = await new Promise((resolve) => {
               reader.onload = (e) => resolve(e.target.result);
               reader.readAsDataURL(imageBlob);
             });
 
-            // Upload to Azure
             const uploadResponse = await fetch('/api/upload-image', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1628,13 +1703,12 @@
             
             if (uploadResult.success) {
               if (i === 0) {
-                primaryImageUrl = uploadResult.url;
+                primaryImageUrlImport = uploadResult.url;
               } else {
                 uploadedImages.push(uploadResult.url);
               }
             }
             
-            // Update progress
             const imageProgress = 60 + (i / listingData.images.length) * 30;
             progressBar.style.width = imageProgress + '%';
             statusText.textContent = `Uploaded ${i + 1}/${Math.min(listingData.images.length, 15)} photos...`;
@@ -1647,13 +1721,9 @@
         progressBar.style.width = '90%';
         statusText.textContent = 'Pre-filling form...';
 
-        // Step 3: Close Zillow modal and open add modal with pre-filled data
         closeZillowModal();
-        
-        // Open the add modal
         openAddModal();
         
-        // Pre-fill the form
         document.getElementById('headline').value = listingData.headline || '';
         document.getElementById('street').value = listingData.street || '';
         document.getElementById('city').value = listingData.city || '';
@@ -1664,8 +1734,7 @@
         document.getElementById('bathrooms').value = listingData.bathrooms || '';
         document.getElementById('price').value = listingData.price || '';
         
-        // Set images
-        primaryImageUrl = primaryImageUrl || listingData.images[0];
+        primaryImageUrl = primaryImageUrlImport || listingData.images[0];
         primaryImageFilename = 'imported-primary.jpg';
         
         galleryImagesData = uploadedImages.map((url, index) => ({
@@ -1676,7 +1745,6 @@
         displayPrimaryPreview(primaryImageUrl, primaryImageFilename);
         displayGalleryPreview();
         
-        // Show completion indicators
         if (primaryImageUrl) {
           document.getElementById('primaryComplete').style.display = 'flex';
         }
@@ -1689,11 +1757,8 @@
 
       } catch (error) {
         console.error('Import error:', error);
-        showImportError(error.message || 'Failed to import property. Zillow may be blocking automated requests.');
-        
-        // Show Smart Paste alternative
+        showImportError(error.message || 'Failed to import property.');
         smartPasteSection.style.display = 'block';
-        
       } finally {
         importBtn.disabled = false;
         importBtn.textContent = 'Import Property';
@@ -1712,7 +1777,6 @@
       }
 
       try {
-        // Extract data using pattern matching
         const data = {
           street: '',
           city: '',
@@ -1724,7 +1788,6 @@
           description: ''
         };
 
-        // Extract address (common patterns)
         const addressMatch = content.match(/(\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Court|Ct|Circle|Cir|Boulevard|Blvd|Way))[,\s]+([A-Za-z\s]+)[,\s]+([A-Z]{2})\s+(\d{5})/i);
         if (addressMatch) {
           data.street = addressMatch[1].trim();
@@ -1733,36 +1796,30 @@
           data.zip = addressMatch[4].trim();
         }
 
-        // Extract price
         const priceMatch = content.match(/\$[\d,]+/);
         if (priceMatch) {
           data.price = priceMatch[0];
         }
 
-        // Extract beds
         const bedsMatch = content.match(/(\d+)\s*(?:bed|bd|bedroom)/i);
         if (bedsMatch) {
           data.bedrooms = parseInt(bedsMatch[1]);
         }
 
-        // Extract baths
         const bathsMatch = content.match(/([\d.]+)\s*(?:bath|ba|bathroom)/i);
         if (bathsMatch) {
           data.bathrooms = parseFloat(bathsMatch[1]);
         }
 
-        // Extract description (look for longer text blocks)
         const sentences = content.match(/[A-Z][^.!?]*[.!?]/g) || [];
         const longSentences = sentences.filter(s => s.length > 50);
         if (longSentences.length > 0) {
           data.description = longSentences.slice(0, 3).join(' ').substring(0, 500);
         }
 
-        // Close Zillow modal and open add modal
         closeZillowModal();
         openAddModal();
 
-        // Pre-fill the form
         if (data.street) document.getElementById('street').value = data.street;
         if (data.city) document.getElementById('city').value = data.city;
         if (data.state) document.getElementById('state').value = data.state;
@@ -1772,7 +1829,6 @@
         if (data.bathrooms) document.getElementById('bathrooms').value = data.bathrooms;
         if (data.description) document.getElementById('description').value = data.description;
 
-        // Generate headline
         const headline = `${data.street}, ${data.city}, ${data.state} ${data.zip}`.trim();
         if (headline.length > 5) {
           document.getElementById('headline').value = headline;
@@ -1793,7 +1849,6 @@
       errorDiv.style.display = 'block';
     }
 
-    // Close modal on outside click
     document.getElementById('homeModal').addEventListener('click', (e) => {
       if (e.target.id === 'homeModal') {
         closeModal();

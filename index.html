@@ -768,7 +768,10 @@
         const res = await fetch('/api/get-homes');
         if (res.ok) {
           const data = await res.json();
-          soldHomes = (data.items || []).filter(h => h.status === 'Sold');
+          // Filter: only Sold homes that are NOT hidden from slideshow
+          soldHomes = (data.items || []).filter(h => 
+            h.status === 'Sold' && !h.hideFromSlideshow
+          );
         }
       } catch (error) {
         console.error('Error loading homes:', error);
