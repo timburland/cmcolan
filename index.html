@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CMConlan Builders | Custom Home Builder in Montgomery County, MD</title>
+  <title>C. M. Conlan Contractors & Builders | Custom Home Builder in Montgomery County, MD</title>
   <meta name="description" content="Award-winning custom home builder and general contractor in Montgomery County, Maryland with over 35 years of experience in residential construction and renovations." />
   <link rel="icon" type="image/png" href="conlanlogo.png" />
 
@@ -509,7 +509,7 @@
   <header class="header">
     <div class="nav-container">
       <a href="#" class="logo">
-        <img src="conlanlogo.png" alt="C. M. Conlan Logo" class="logo-image" />
+        <img src="conlan-logo.png" alt="C. M. Conlan Logo" class="logo-image" />
         <span>C. M. Conlan Contractors &amp; Builders</span>
       </a>
       <button class="mobile-menu-btn" onclick="toggleMenu()">â˜°</button>
@@ -662,7 +662,7 @@
           <p>Bethesda, Maryland</p>
           <p>Office: 301-983-1301</p>
           <p>Fax: 301-983-2544</p>
-          <p>Email: <a href="/cdn-cgi/l/email-protection#fd9e958f948ebd9e909e9293919c93d39e9290"><span class="__cf_email__" data-cfemail="9dfef5eff4eeddfef0fef2f3f1fcf3b3fef2f0">[email&#160;protected]</span></a></p>
+          <p>Email: <a href="mailto:chris@cmconlan.com">chris@cmconlan.com</a></p>
         </div>
 
         <div>
@@ -684,7 +684,7 @@
     </div>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
     // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener("click", function (e) {
@@ -738,4 +738,16 @@
 
       if (showingA) {
         bgB.style.backgroundImage = nextUrl;
-        bgB.style.opacity = "1
+        bgB.style.opacity = "1";
+        bgA.style.opacity = "0";
+      } else {
+        bgA.style.backgroundImage = nextUrl;
+        bgA.style.opacity = "1";
+        bgB.style.opacity = "0";
+      }
+
+      showingA = !showingA;
+    }, 6000);
+  </script>
+</body>
+</html>
