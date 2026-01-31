@@ -1,21 +1,38 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FILE PATH: api/get-homes/index.js
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Get homes from Azure Blob Storage
+ * Based on your existing file with rate limiting added
+ * NOTE: No API key required for reads (public data)
+ */
+
 const { BlobServiceClient } = require('@azure/storage-blob');
+const { checkRateLimit, getClientIp, getCorsHeaders } = require('../shared/security');
 
 module.exports = async function (context, req) {
     context.log('Get homes function triggered');
 
     // Enable CORS
     context.res = {
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-        }
+        headers: getCorsHeaders()
     };
 
     // Handle preflight request
     if (req.method === 'OPTIONS') {
         context.res.status = 200;
+        return;
+    }
+
+    // === SECURITY: Rate Limiting (60 requests/minute for reads) ===
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, 60, 60000);
+    if (!rateLimit.allowed) {
+        context.log.warn(`Rate limit exceeded for ${clientIp}`);
+        context.res.status = 429;
+        context.res.headers['Retry-After'] = rateLimit.retryAfter;
+        context.res.body = { error: 'Too many requests', items: [] };
         return;
     }
 

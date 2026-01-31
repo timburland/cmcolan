@@ -1,21 +1,46 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FILE PATH: api/save-homes/index.js
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Save homes to Azure Blob Storage
+ * Based on your existing file with security added
+ */
+
 const { BlobServiceClient } = require('@azure/storage-blob');
+const { validateApiKey, checkRateLimit, getClientIp, sanitizeString, getCorsHeaders } = require('../shared/security');
 
 module.exports = async function (context, req) {
     context.log('Save homes function triggered');
 
-    // Enable CORS
+    // Enable CORS (updated to allow X-API-Key header)
     context.res = {
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-        }
+        headers: getCorsHeaders()
     };
 
     // Handle preflight request
     if (req.method === 'OPTIONS') {
         context.res.status = 200;
+        return;
+    }
+
+    // === SECURITY: Validate API Key ===
+    const authResult = validateApiKey(req, context);
+    if (!authResult.valid) {
+        context.log.warn(`Unauthorized save attempt from ${getClientIp(req)}`);
+        context.res.status = 401;
+        context.res.body = { error: `Unauthorized: ${authResult.error}` };
+        return;
+    }
+
+    // === SECURITY: Rate Limiting (10 requests/minute for writes) ===
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, 10, 60000);
+    if (!rateLimit.allowed) {
+        context.log.warn(`Rate limit exceeded for ${clientIp}`);
+        context.res.status = 429;
+        context.res.headers['Retry-After'] = rateLimit.retryAfter;
+        context.res.body = { error: 'Too many requests. Please try again later.' };
         return;
     }
 

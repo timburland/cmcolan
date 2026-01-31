@@ -1,24 +1,43 @@
-// ALTERNATIVE VERSION: Using Mapbox Geocoding API
-// Mapbox gives you 100,000 FREE geocoding requests per month
-// Much easier to set up than Azure Maps
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FILE PATH: api/geocode-address/index.js
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Geocode addresses using Mapbox API
+ * Based on your existing Mapbox version with security added
+ */
 
 const https = require('https');
+const { validateApiKey, checkRateLimit, getClientIp, sanitizeString, getCorsHeaders } = require('../shared/security');
 
 module.exports = async function (context, req) {
     context.log('Mapbox geocode function triggered');
 
-    const corsHeaders = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-    };
-
-    context.res = { headers: corsHeaders };
+    context.res = { headers: getCorsHeaders() };
 
     if (req.method === 'OPTIONS') {
         context.res.status = 200;
         context.res.body = {};
+        return;
+    }
+
+    // === SECURITY: Validate API Key ===
+    const authResult = validateApiKey(req, context);
+    if (!authResult.valid) {
+        context.log.warn(`Unauthorized geocode attempt from ${getClientIp(req)}`);
+        context.res.status = 401;
+        context.res.body = { error: `Unauthorized: ${authResult.error}` };
+        return;
+    }
+
+    // === SECURITY: Rate Limiting (30 requests/minute) ===
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, 30, 60000);
+    if (!rateLimit.allowed) {
+        context.log.warn(`Rate limit exceeded for ${clientIp}`);
+        context.res.status = 429;
+        context.res.headers['Retry-After'] = rateLimit.retryAfter;
+        context.res.body = { error: 'Too many requests. Please try again later.' };
         return;
     }
 
@@ -114,21 +133,3 @@ module.exports = async function (context, req) {
         };
     }
 };
-
-/* 
-SETUP INSTRUCTIONS:
-
-1. Create a Mapbox account (FREE): https://account.mapbox.com/auth/signup/
-2. Get your access token from: https://account.mapbox.com/access-tokens/
-3. In Azure Portal, go to your Function App
-4. Configuration > Application settings > + New application setting
-5. Add:
-   - Name: MAPBOX_ACCESS_TOKEN
-   - Value: (your Mapbox token, starts with "pk.")
-6. Save
-
-FREE TIER:
-- 100,000 geocoding requests per month
-- No credit card required
-- Perfect for your use case!
-*/

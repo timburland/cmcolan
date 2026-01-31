@@ -1,3 +1,13 @@
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  FILE PATH: admin/index.html
+  ═══════════════════════════════════════════════════════════════════════════
+  
+  Admin Portal for C. M. Conlan website
+  UPDATED: Added API key authentication headers to all API calls
+  
+  ⚠️ IMPORTANT: Change API_SECRET_KEY below to match what you set in Azure!
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -929,6 +939,21 @@
     const STORAGE_KEY = 'cmconlan_homes';
     const AUTH_KEY = 'cmconlan_auth';
 
+    // =========================================================================
+    // API Security Key - MUST match API_SECRET_KEY in Azure!
+    // ⚠️ CHANGE THIS to your actual key after setting it in Azure!
+    // =========================================================================
+    const API_SECRET_KEY = '7f3a9bc2d5e8f1a4b6c9d2e5f8a1b4c7d0e3f6a9b2c5d8e1f4a7b0c3d6e9f2a5';
+
+    // Helper function for authenticated API calls
+    function getApiHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'X-API-Key': API_SECRET_KEY
+        };
+    }
+    // =========================================================================
+
     let primaryImageUrl = '';
     let primaryImageFilename = '';
     let galleryImagesData = [];
@@ -1015,7 +1040,7 @@
 
           const response = await fetch('/api/upload-image', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getApiHeaders(),
             body: JSON.stringify({
               imageData: imageData,
               fileName: file.name,
@@ -1101,7 +1126,7 @@
 
           const response = await fetch('/api/upload-image', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getApiHeaders(),
             body: JSON.stringify({
               imageData: imageData,
               fileName: file.name,
@@ -1229,7 +1254,7 @@
       try {
         const response = await fetch('/api/save-homes', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getApiHeaders(),
           body: JSON.stringify({ items: homes })
         });
 
@@ -1534,7 +1559,7 @@
         try {
           const geocodeResponse = await fetch('/api/geocode-address', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getApiHeaders(),
             body: JSON.stringify({ address: fullAddress })
           });
           
@@ -1642,7 +1667,7 @@
       try {
         const response = await fetch('/api/parse-zillow', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getApiHeaders(),
           body: JSON.stringify({ url })
         });
 
@@ -1691,7 +1716,7 @@
 
             const uploadResponse = await fetch('/api/upload-image', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: getApiHeaders(),
               body: JSON.stringify({
                 imageData: imageData,
                 fileName: `imported_${Date.now()}_${i}.jpg`,

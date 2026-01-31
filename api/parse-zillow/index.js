@@ -1,25 +1,45 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FILE PATH: api/parse-zillow/index.js
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Parse Zillow/Trulia/Redfin listings
+ * Based on your existing file with security added
+ */
+
 const https = require('https');
 const http = require('http');
+const { validateApiKey, checkRateLimit, getClientIp, getCorsHeaders } = require('../shared/security');
 
 module.exports = async function (context, req) {
     context.log('Parse Zillow listing triggered');
 
-    // Enable CORS
-    const corsHeaders = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-    };
-
-    context.res = {
-        headers: corsHeaders
-    };
+    context.res = { headers: getCorsHeaders() };
 
     // Handle preflight OPTIONS request
     if (req.method === 'OPTIONS') {
         context.res.status = 200;
         context.res.body = {};
+        return;
+    }
+
+    // === SECURITY: Validate API Key ===
+    const authResult = validateApiKey(req, context);
+    if (!authResult.valid) {
+        context.log.warn(`Unauthorized parse attempt from ${getClientIp(req)}`);
+        context.res.status = 401;
+        context.res.body = { error: `Unauthorized: ${authResult.error}` };
+        return;
+    }
+
+    // === SECURITY: Rate Limiting (15 requests/minute) ===
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, 15, 60000);
+    if (!rateLimit.allowed) {
+        context.log.warn(`Rate limit exceeded for ${clientIp}`);
+        context.res.status = 429;
+        context.res.headers['Retry-After'] = rateLimit.retryAfter;
+        context.res.body = { error: 'Too many requests. Please try again later.' };
         return;
     }
 
@@ -225,7 +245,7 @@ function parseListingHTML(html, sourceUrl) {
             // Try to find image URLs in script tags (common pattern)
             const imageUrlMatches = html.match(/https?:\/\/[^"'\s]+\.(jpg|jpeg|png|webp)/gi);
             if (imageUrlMatches) {
-                // Filter to likely property images (usually larger, contain 'uncropped' or specific patterns)
+                // Filter to likely property images
                 const propertyImages = imageUrlMatches.filter(url => 
                     url.includes('photos.zillowstatic.com') || 
                     url.includes('ssl.cdn-redfin.com') ||
@@ -235,7 +255,7 @@ function parseListingHTML(html, sourceUrl) {
                 
                 // Remove duplicates
                 const uniqueImages = [...new Set(propertyImages)];
-                data.images = uniqueImages.slice(0, 20); // Limit to 20 images
+                data.images = uniqueImages.slice(0, 20);
             }
         }
 
@@ -259,7 +279,7 @@ function parseListingHTML(html, sourceUrl) {
         // Generate headline from address
         data.headline = `${data.street}, ${data.city}, ${data.state} ${data.zip}`.trim();
 
-        // Clean up description (remove HTML entities, extra whitespace)
+        // Clean up description
         data.description = data.description
             .replace(/&quot;/g, '"')
             .replace(/&amp;/g, '&')
@@ -272,6 +292,6 @@ function parseListingHTML(html, sourceUrl) {
 
     } catch (error) {
         console.error('Error parsing HTML:', error);
-        return data; // Return partial data even if parsing fails
+        return data;
     }
 }

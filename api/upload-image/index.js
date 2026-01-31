@@ -1,20 +1,45 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FILE PATH: api/upload-image/index.js
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Upload images to Azure Blob Storage
+ * Based on your existing file with security added
+ */
+
 const { BlobServiceClient } = require('@azure/storage-blob');
+const { validateApiKey, checkRateLimit, getClientIp, getCorsHeaders } = require('../shared/security');
 
 module.exports = async function (context, req) {
     context.log('Upload image function triggered');
 
     // Enable CORS
     context.res = {
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-        }
+        headers: getCorsHeaders()
     };
 
     if (req.method === 'OPTIONS') {
         context.res.status = 200;
+        return;
+    }
+
+    // === SECURITY: Validate API Key ===
+    const authResult = validateApiKey(req, context);
+    if (!authResult.valid) {
+        context.log.warn(`Unauthorized upload attempt from ${getClientIp(req)}`);
+        context.res.status = 401;
+        context.res.body = { error: `Unauthorized: ${authResult.error}` };
+        return;
+    }
+
+    // === SECURITY: Rate Limiting (20 requests/minute) ===
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, 20, 60000);
+    if (!rateLimit.allowed) {
+        context.log.warn(`Rate limit exceeded for ${clientIp}`);
+        context.res.status = 429;
+        context.res.headers['Retry-After'] = rateLimit.retryAfter;
+        context.res.body = { error: 'Too many requests. Please try again later.' };
         return;
     }
 
@@ -27,6 +52,32 @@ module.exports = async function (context, req) {
             return;
         }
 
+        // === SECURITY: Validate image type ===
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+        const mimeMatch = imageData.match(/^data:(image\/[a-zA-Z+]+);base64,/);
+        
+        if (!mimeMatch) {
+            context.res.status = 400;
+            context.res.body = { error: 'Invalid image format' };
+            return;
+        }
+        
+        const mimeType = mimeMatch[1].toLowerCase();
+        if (!validTypes.includes(mimeType)) {
+            context.res.status = 400;
+            context.res.body = { error: `Invalid image type: ${mimeType}` };
+            return;
+        }
+
+        // === SECURITY: Check file size (10MB max) ===
+        const base64Data = imageData.split(',')[1];
+        const sizeInBytes = (base64Data.length * 3) / 4;
+        if (sizeInBytes > 10 * 1024 * 1024) {
+            context.res.status = 400;
+            context.res.body = { error: 'Image too large. Maximum size is 10MB.' };
+            return;
+        }
+
         const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
         
         if (!connectionString) {
@@ -36,7 +87,6 @@ module.exports = async function (context, req) {
         }
 
         // Convert base64 to buffer
-        const base64Data = imageData.split(',')[1]; // Remove data:image/...;base64, prefix
         const buffer = Buffer.from(base64Data, 'base64');
 
         // Create folder path from address if provided
